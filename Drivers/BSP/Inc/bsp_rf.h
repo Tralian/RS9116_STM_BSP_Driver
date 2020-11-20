@@ -24,85 +24,135 @@
 #include "soft_timer.h"
 #include "bsp_uart.h"
 
+/* Exported macro ------------------------------------------------------------*/
+
+
+#define TX_BUFFER_SIZE		70
+#define RX_BUFFER_SIZE	  150
 /* Exported types ------------------------------------------------------------*/
-#define DEFAULT_WIFI_PACK_LEN				6
-#define CMD_BUF_SIZE				        10
-#define CMD_BLOCKING_TX_TIMEOUT_S	  10
+/**@AT Command Struct*/
+typedef struct 
+{
+	  char * AT_RSI_;
+	  char * Newline;
+		char * OK;
+	  char * Error;
+	  char FS;
+		char U;
+	  char _1;
+	  char * rest;
+	  char * OperMode;
+	  char * Frame;
+	  char * Band;
+	  char * Init;
+	  char * WiFI_Scan;
+	  char * PSK;
+		char * WIFI_Join;
+		char * S_IPconfig;
+		char * DnsGet;
+		char * MQTT;
+		
+}RSI_AT_COMMAND_t;
+/**@AT Command Parameter*/
+
+typedef struct 
+{
+	  char * OperMode;
+	  char * Frame;
+	  char * Band;
+	  char * WiFI_Scan;
+	  char * PSK;
+		char * WIFI_Join;
+		char * S_IPconfig;
+		char * DnsGet;
+		char * S_MQTT_Con;
+	  char * MQTT_Sub;
+	  char * MQTT_Pub;
+	  char * MQTT_unSub;
+	  char * S_MQTT_disCon;
+	  char * S_MQTT_delete;
+}RSI_AT_COMMAND_PARAMETER_t;
 
 
 typedef enum
 {
 	 DONE=  0x00,
-	 BUSY=  0x01,
+	 BUSY,
 
 }DMA_Status_t;
-//typedef struct
-//{
-//	RX_Command_t  cmd_buf[CMD_BUF_SIZE];
-//	uint8_t    write_index;
-//	uint8_t    read_index;
+typedef enum
+{
+	 None= 0x00,
+	 OK,
+	 Error,
 
-//}Command_buffer_t;
-
-
-
+}AT_respond_t;
+/**@RSI status */
 
 typedef enum
 {
-		RS9116_power_off  =0x00,
-		RS9116_set_opermode,
-	  RS9116_set_feat,
-		RS9116_set_band,
-		RS9116_init,
-		RS9116_scan_WIFI,
-		RS9116_set_psk,
-		RS9116_join_WIFI,
-		RS9116_IPconfig,
-		RS9116_DNS_get,
-		RS9116_MQTT_Init,
-		RS9116_MQTT_Con,
-		RS9116_MQTT_Sub,
-		RS9116_MQTT_Pub,
-		RS9116_MQTT_unSub,
-		RS9116_MQTT_disCon,
-		RS9116_MQTT_delete,
-		RS9116_LPM,
+		S_Power_off  =0x00,
+	  S_Booting,
+		S_Set_opermode,
+	  S_Set_feat,
+		S_Set_band,
+		S_Init,
+		S_Scan_WIFI,
+		S_Set_psk,
+		S_Join_WIFI,
+		S_IPconfig,
+		S_DNS_get,
+		S_MQTT_Init,
+		S_MQTT_Con,
+		S_MQTT_disCon,
+		S_MQTT_delete,
+		S_LowerPowerMode,
 
 }RS9116_State_t;
+/**@RSI Error code */
 
-#ifdef RF_MODULE
+typedef enum
+{
+	None_error=0x00,	
+	Commmunication_Timeout,
+	AT_Respond_Error,
+}RS9116_ERROR_t;
+/**@MQTT infor */
+
+typedef struct
+{
+	uint8_t Num_SubScribe_Topic;
+	char *  Sub_Topic_nmae;
+	uint8_t Num_PubScribe_Topic;
+	char *  Pub_Topic_nmae;
+  /*Need add Topic ,Can Export here*/
+}MQTT_t;
 
 typedef struct
 {	
 	RS9116_State_t rs_state;
-	uint8_t  m_rx_buf[DMA_RECEIVE_IDEL_IT_BUFFER_SIZE] ;
+	MQTT_t Topic;
+	RS9116_ERROR_t error_code;
+	AT_respond_t AT_respond;
+	char   m_tx_buf[TX_BUFFER_SIZE] ;
+	char   m_rx_buf[RX_BUFFER_SIZE] ;
 }RF_Ctrl_t;
-#endif
+
 /* Exported constants --------------------------------------------------------*/
 
-/* Exported macro ------------------------------------------------------------*/
-
-
-
-
-
-			
-
 /* Exported functions ------------------------------------------------------- */
-
-
 /**For Application use*/
+bool BSP_RF_RS9116_Init(void);
+bool BSP_RF_RS9116_WIFI_Connect(void);
+bool BSP_RF_RS9116_MQTT_Connect(void);
+bool BSP_RF_RS9116_MQTT_DisConnect(void);
+bool BSP_RF_RS9116_MQTT_Subcribe(void);
+bool BSP_RF_RS9116_MQTT_UnSubcribe(void);
+bool BSP_RF_RS9116_MQTT_Publish(void);
 
 
-/**********************/
-void BSP_RF_AT_Command_Send(const char * command);
-void BSP_RF_AT_Send_FS(void);
-void BSP_RF_AT_Send_Char(char ch);
-
-
-bool BSP_RF_Start_dma_receive(void);
-DMA_Status_t BSP_RF_Get_DMA_RX_Status(void);
-
+void BSP_RF_set_status(RS9116_State_t stage);
+RS9116_State_t BSP_RF_get_module_status(void);
 
 
 /* Linker functions ------------------------------------------------------- */

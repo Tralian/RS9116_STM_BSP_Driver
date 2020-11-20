@@ -29,4 +29,9 @@ rs9116_atcommand\stm32l0xx_it.o: ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_h
 rs9116_atcommand\stm32l0xx_it.o: ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_pwr_ex.h
 rs9116_atcommand\stm32l0xx_it.o: ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart.h
 rs9116_atcommand\stm32l0xx_it.o: ../Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart_ex.h
+rs9116_atcommand\stm32l0xx_it.o: ..\Drivers\BSP\Inc\bsp_uart.h
+rs9116_atcommand\stm32l0xx_it.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+rs9116_atcommand\stm32l0xx_it.o: ..\Drivers\BSP\Inc\bsp_rf.h
+rs9116_atcommand\stm32l0xx_it.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+rs9116_atcommand\stm32l0xx_it.o: ..\Drivers\Library\Inc\soft_timer.h
 rs9116_atcommand\stm32l0xx_it.o: ../Core/Inc/stm32l0xx_it.h

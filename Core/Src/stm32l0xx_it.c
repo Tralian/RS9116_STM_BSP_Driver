@@ -20,53 +20,22 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "bsp_uart.h"
+#include "bsp_rf.h"
+
 #include "stm32l0xx_it.h"
 /* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-/* USER CODE END Includes */
-
 /* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN TD */
-
-/* USER CODE END TD */
-
 /* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-
-/* USER CODE END PD */
-
 /* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
 /* Private variables ---------------------------------------------------------*/
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-
 /* Private function prototypes -----------------------------------------------*/
-/* USER CODE BEGIN PFP */
-
-/* USER CODE END PFP */
-
 /* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
 /* External variables --------------------------------------------------------*/
 extern UART_HandleTypeDef huart;
 
 extern DMA_HandleTypeDef hdma_usart2_rx;
-extern DMA_HandleTypeDef hdma_usart2_tx;
-
-extern void DMA_IDEL_IT_Get_data(void);
-
-/* USER CODE BEGIN EV */
-
-/* USER CODE END EV */
-
+extern void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void);
 /******************************************************************************/
 /*           Cortex-M0+ Processor Interruption and Exception Handlers          */
 /******************************************************************************/
@@ -134,18 +103,14 @@ void DMA1_Channel2_3_IRQHandler(void)
   */
 void USART2_IRQHandler(void)
 {
-	if((__HAL_UART_GET_FLAG(&huart,UART_FLAG_IDLE)== SET))//If Get Idle interrupt
-	{ 
-		//READ_REG(huart.Instance->ISR);
-	  //temp = huart.Instance->SR;  //Read it Can Clear SR Register 
-		//temp = huart.Instance->DR;  //Read it Can Clear DR Register 
-			__HAL_UART_CLEAR_IDLEFLAG(&huart);//Clear Flag
-		  /*Stop DMA*/
-	  	HAL_UART_DMAStop(&huart);
-		  DMA_IDEL_IT_Get_data();
+	/*Character match interrupt*/
+	if(__HAL_UART_GET_IT(&huart, UART_IT_CM))
+	{
+	  BSP_UART_StopDMA();/*Stop DMA*/
+		BSP_UART_RX_DMA_Character_Martch_IT_Handler();
+    __HAL_UART_CLEAR_FLAG(&huart, UART_CLEAR_CMF);
+  }
 
-  
-	}
   HAL_UART_IRQHandler(&huart);
 
 }

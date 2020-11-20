@@ -38,6 +38,7 @@
 extern DMA_HandleTypeDef hdma_adc;
 extern DMA_HandleTypeDef hdma_usart2_tx;
 extern DMA_HandleTypeDef hdma_usart2_rx;
+extern UART_HandleTypeDef huart;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -59,6 +60,7 @@ void HAL_MspInit(void)
 
 
 }
+
 void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
 {
 
@@ -70,8 +72,9 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
   /* USER CODE END USART2_MspInit 0 */
     /* USART2 clock enable */
     __HAL_RCC_USART2_CLK_ENABLE();
-    __HAL_RCC_DMA1_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_DMA1_CLK_ENABLE();
+
     /**USART2 GPIO Configuration
     PA2     ------> USART2_TX
     PA15     ------> USART2_RX
@@ -82,6 +85,9 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = UARTx_RX_AF;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+		
+		
+		
 
     /* USART2 DMA Init */
     /* USART2_RX Init */
@@ -104,26 +110,39 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
 
     __HAL_LINKDMA(uartHandle,hdmarx,hdma_usart2_rx);
 
-//    /* USART2_TX Init */
-//    hdma_usart2_tx.Instance = UARTx_TX_DMA_CHANNEL;
-//    hdma_usart2_tx.Init.Request = UARTx_TX_DMA_REQUEST;
-//    hdma_usart2_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
-//    hdma_usart2_tx.Init.PeriphInc = DMA_PINC_DISABLE;
-//    hdma_usart2_tx.Init.MemInc = DMA_MINC_ENABLE;
-//    hdma_usart2_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-//    hdma_usart2_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-//    hdma_usart2_tx.Init.Mode = DMA_NORMAL;
-//    hdma_usart2_tx.Init.Priority = DMA_PRIORITY_LOW;
-//    if (HAL_DMA_Init(&hdma_usart2_tx) != HAL_OK)
-//    {
-//			while(1)
-//			{
-//			}
-//    }
+    /* USART2_TX Init */
+    hdma_usart2_tx.Instance = UARTx_TX_DMA_CHANNEL;
+    hdma_usart2_tx.Init.Request = UARTx_TX_DMA_REQUEST;
+    hdma_usart2_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
+    hdma_usart2_tx.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_usart2_tx.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_usart2_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    hdma_usart2_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+    hdma_usart2_tx.Init.Mode = DMA_NORMAL;
+    hdma_usart2_tx.Init.Priority = DMA_PRIORITY_LOW;
+    if (HAL_DMA_Init(&hdma_usart2_tx) != HAL_OK)
+    {
+			while(1)
+			{
+			}
+    }
 
-//    __HAL_LINKDMA(uartHandle,hdmatx,hdma_usart2_tx);
-
-
+    __HAL_LINKDMA(uartHandle,hdmatx,hdma_usart2_tx);
+			/* NVIC configuration for DMA transfer complete interrupt (USART2_TX) */
+//		HAL_NVIC_SetPriority(UARTx_DMA_TX_IRQn, UARTx_DMA_IRQ_PRI, 0);
+//		HAL_NVIC_EnableIRQ(UARTx_DMA_TX_IRQn);
+    
+		/* NVIC configuration for DMA transfer complete interrupt (USART2_RX) */
+		HAL_NVIC_SetPriority(UARTx_DMA_RX_IRQn, UARTx_DMA_IRQ_PRI, 0);
+		HAL_NVIC_EnableIRQ(UARTx_DMA_RX_IRQn);
+  
+		/* NVIC for USART, to catch the TX complete */
+		HAL_NVIC_SetPriority(UARTx_IRQn, UARTx_IRQ_PRI, 0);
+		HAL_NVIC_EnableIRQ(UARTx_IRQn);
+		/*UART Character Match Interrupt*/
+		USART2->CR2 |= 0x0A000000; // \r 0x0A
+    __HAL_UART_ENABLE_IT(uartHandle,UART_IT_CM);
+		
   }
 }
 

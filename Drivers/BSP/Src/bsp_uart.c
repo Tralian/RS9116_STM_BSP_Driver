@@ -39,7 +39,7 @@ static __IO bool m_is_tx_done;
 static __IO bool m_is_rx_done;
 	
 	
-static uint16_t DMA_RX_length=0;
+//static uint16_t DMA_RX_length=0;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 	
@@ -67,6 +67,7 @@ int fputc(int ch, FILE *f)
   */
 void BSP_UART_Init(void)
 {
+
 	huart.Instance = UARTx;
 	huart.Init.BaudRate   = UART_BAUD;
   huart.Init.WordLength = UART_WORDLENGTH_8B;
@@ -79,19 +80,8 @@ void BSP_UART_Init(void)
 	{
 	 while(1);
 	}		
-	DMA_RX_length=0;
 	
-			/* NVIC configuration for DMA transfer complete interrupt (USART2_TX) */
-//		HAL_NVIC_SetPriority(UARTx_DMA_TX_IRQn, UARTx_DMA_IRQ_PRI, 0);
-//		HAL_NVIC_EnableIRQ(UARTx_DMA_TX_IRQn);
-    
-		/* NVIC configuration for DMA transfer complete interrupt (USART2_RX) */
-		HAL_NVIC_SetPriority(UARTx_DMA_RX_IRQn, UARTx_DMA_IRQ_PRI, 0);
-		HAL_NVIC_EnableIRQ(UARTx_DMA_RX_IRQn);
-  
-		/* NVIC for USART, to catch the TX complete */
-		HAL_NVIC_SetPriority(UARTx_IRQn, UARTx_IRQ_PRI, 0);
-		HAL_NVIC_EnableIRQ(UARTx_IRQn);
+
 
 }
 
@@ -142,20 +132,20 @@ void BSP_UART_ReceiveDMA(uint8_t *byte_array, uint8_t size)
 	HAL_UART_Receive_DMA(&huart, byte_array, size);
 }
 
-/**
-  * @brief	BSP uart receive function, DMA mode and UART Idel interrupt
-	* @param	byte_array, data to be transmit
-     buffer length reference  DMA_RECEIVE_IDEL_IT_BUFFER_SIZE
-  */
-void BSP_UART_Receive_Mode_DMA_IDEL_IT(uint8_t *byte_array)
-{
-	 m_is_rx_done = false;
-	__HAL_UART_ENABLE_IT(&huart,UART_IT_IDLE);
-	__HAL_UART_CLEAR_FLAG(&huart,UART_CLEAR_OREF);//Clear  if overrun data
-	HAL_Delay(10);
-  /**@TBD*/
-	HAL_UART_Receive_DMA(&huart, byte_array, DMA_RECEIVE_IDEL_IT_BUFFER_SIZE);
-}
+///**
+//  * @brief	BSP uart receive function, DMA mode and UART Idel interrupt
+//	* @param	byte_array, data to be transmit
+//     buffer length reference  DMA_RECEIVE_IDEL_IT_BUFFER_SIZE
+//  */
+//void BSP_UART_Receive_Mode_DMA_IDEL_IT(uint8_t *byte_array)
+//{
+//	 m_is_rx_done = false;
+//	__HAL_UART_ENABLE_IT(&huart,UART_IT_IDLE);
+//	__HAL_UART_CLEAR_FLAG(&huart,UART_CLEAR_OREF);//Clear  if overrun data
+//	HAL_Delay(10);
+//  /**@TBD*/
+//	HAL_UART_Receive_DMA(&huart, byte_array, DMA_RECEIVE_IDEL_IT_BUFFER_SIZE);
+//}
 
 /**
   * @brief	BSP Stop DMA mode
@@ -180,6 +170,7 @@ bool DMA_RX_Status(void)
  return m_is_rx_done;
 
 }
+
 
 /**
   * @brief	BSP uart receive function, blocking mode
@@ -221,29 +212,29 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 {
   if(UartHandle == &huart)
 	{
-
+     
 		/**@  If Come here have some  Error */
 	
 	}
 }
-/**
-  * @brief  This Funciton is use to Get data form elasticity length
-  * @param  None
-  * @note   
-  * @retval None
-  */
-void DMA_IDEL_IT_Get_data(void)
-{
+///**
+//  * @brief  This Funciton is use to Get data form elasticity length
+//  * @param  None
+//  * @note   
+//  * @retval None
+//  */
+//void DMA_IDEL_IT_Get_data(void)
+//{
 
-   		m_is_rx_done = true;
-			static uint16_t temp=0;	
-       uint16_t BUFFER_SIZE=huart.RxXferSize;	//get RX buffer size
+//   		m_is_rx_done = true;
+//			static uint16_t temp=0;	
+//       uint16_t BUFFER_SIZE=huart.RxXferSize;	//get RX buffer size
 
-			temp  = hdma_usart2_rx.Instance->CNDTR;// Get how many data didn't get
-			
-	    DMA_RX_length =  BUFFER_SIZE - temp; //Get how many data get
-			BSP_UART_RX_DMA_Handler(DMA_RX_length);
-}
+//			temp  = hdma_usart2_rx.Instance->CNDTR;// Get how many data didn't get
+//			
+//	    DMA_RX_length =  BUFFER_SIZE - temp; //Get how many data get
+//			BSP_UART_RX_DMA_Handler(DMA_RX_length);
+//}
 /**
   * @brief  UART error callbacks
   * @param  UartHandle: UART handle

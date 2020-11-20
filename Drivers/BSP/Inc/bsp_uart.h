@@ -49,7 +49,7 @@
 
 /* Definition for USARTx's DMA */
 #define UARTx_TX_DMA_CHANNEL            DMA1_Channel2
-#define UARTx_RX_DMA_CHANNEL            DMA1_Channel3
+#define UARTx_RX_DMA_CHANNEL            DMA1_Channel5
 #define UARTx_TX_DMA_REQUEST            DMA_REQUEST_4
 #define UARTx_RX_DMA_REQUEST          	DMA_REQUEST_4
 
@@ -81,7 +81,6 @@
 #define WIFI_CCreq_IRQ_PRI					1					
 																	
 																	
-#define DMA_RECEIVE_IDEL_IT_BUFFER_SIZE					200					
 
 /* Exported functions ------------------------------------------------------- */
 void BSP_UART_Init(void);

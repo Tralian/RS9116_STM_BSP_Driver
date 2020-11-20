@@ -12,7 +12,9 @@ Redpine have abundant example coed with WIFI host, but most of that is for sapis
 
 I'm working at a smell Company in Taiwan ,I'm very new at HW and FW design, but need lead  whole project\(actually only me in the team at beginning\), you can image that how hopeless and helpless at that period
 
- Luckly, I met my mental Zhih-Tai, Liu\(He also have a Electro-Hedgehog in Tasker \)last year , 
+ Luckly, I met my mentor  Zhih-Tai, Liu\(He also have a Electro-Hedgehog in Tasker \)last year , He teach me a lot at HW designed and FW structure. We oftenexcitedly discussing some designed over and over again 
 
-at aaff
+ so I decide pass this passion to other one who struggle with problem but no have abundant  source between 
+
+In the end , thank my partner chase hu, you are so support no only in HW and ME but also in  design ideas
 

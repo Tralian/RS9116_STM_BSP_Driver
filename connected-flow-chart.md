@@ -1,4 +1,4 @@
-# Tutorial : RS9116 Connect to AWS using MQTT \(UART Library implement by STM\)
+# Tutorial : RS9116 Connect to AWS using MQTT \(AT Command Library implement by STM\)
 
 ## Develop Flow Chart
 
@@ -18,9 +18,29 @@ Silicon provide simple Python 2.7 script to upload AWS certificate to RS9116 mod
 
 so my work mate rewrite it ,you also can find python script in my project
 
-## _3.Need modify here after library complete_
+## _3.STM board setting and Import library_
 
-\_\_
+### 1.Create STM project 
+
+In my library have using DMA UART peripheral .need config first\( also can just modify form my example , just slight change in GPIO port and DMA channel I though\)
+
+### 2.Import bsp\_rf/bsp\_uart library to STM project
+
+### 3.Config MQTT setting in bsp\_rf.c
+
+```c
+const char * SSID="Yours WIFI";
+const char * SSID_password="Yours WIFI password";
+const char * AWS_endpoint="--Yours AWS endpoint----.iot.----.amazonaws.com";
+const char * MQTT_Server_Port="8883";
+const char * Device_ID="Yours Device ID";
+const char * MQTT_username="username";
+const char * MQTT_password="password";
+const char * MQTT_client_port="5503";
+const char * MQTT_keep_alive_interval="80";
+const char * MQTT_En_clean_session="1";
+const char * MQTT_En_keep_alive_interval="1";
+```
 
 ## 4.Application Test
 

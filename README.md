@@ -12,7 +12,7 @@ Redpine have abundant example coed with WIFI host, but most of that are is for s
 
 I'm working at a Start-up Company in Taiwan ,I'm very new at HW and FW design, but need lead  whole project\(actually only me in the team at beginning\), you can image that how hopeless and helpless at that period
 
- Luckly, I met my mentor  Zhih-Tai, Liu\(He also have a [Electro-Hedgehog](https://www.tasker.com.tw/workroom/3KWQr) in Tasker \)last year , He teach me a lot at HW designed and FW structure. We often excitedly discussing some designed over and over again 
+ Luckly, I met my mentor  Zhih-Tai, Liu last year \(He is a freelancer and also have a  [Electro-Hedgehog](https://www.tasker.com.tw/workroom/3KWQr) in Taiwan Tasker \), He teach me a lot at HW designed and FW structure. We often discussing some designed over and over again excitedly  
 
  so I decide pass this passion to other one who struggle with problem but no have abundant  source 
 

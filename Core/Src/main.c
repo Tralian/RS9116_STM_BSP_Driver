@@ -32,6 +32,13 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+
+/*Need add Topic ,Can Export here*/
+
+const char * MQTT_Sub_Topic="yztek/ty002/d/NECCUIUaAZDC";
+const char * MQTT_Pub_Topic="yztek/ty002/s";
+
+
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void MX_GPIO_Init(void);
@@ -45,18 +52,18 @@ int main(void)
   MX_GPIO_Init();  
 	BSP_UART_Init();
 	BSP_RF_RS9116_Init();
-	if(BSP_RF_get_module_status()==S_Init)
-	{
-		BSP_RF_RS9116_WIFI_Connect();
-	}
-	if(BSP_RF_get_module_status()==S_IPconfig)
-	{
-		BSP_RF_RS9116_MQTT_Connect();
-	}
+  BSP_RF_RS9116_WIFI_Connect();
+//	BSP_RF_RS9116_MQTT_Connect();
+//	HAL_Delay(5000);
+//	BSP_RF_RS9116_MQTT_DisConnect();
+
   while (1)
 
   { 
-    HAL_Delay(5000);
+//		BSP_RF_RS9116_MQTT_Connect();
+//    HAL_Delay(5000);
+//	  BSP_RF_RS9116_MQTT_DisConnect();
+//		HAL_Delay(5000);
 
   }
 }

@@ -21,8 +21,14 @@
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
-#define ATtimeout_ms	  5000
-#define WIFI_CONNECT_timeout_ms	  20000
+#define TIME_OUT_NORMAL	  5000
+#define TIME_OUT_WIFI_CONNECT	  10000
+#define TIME_OUT_MQTT	  				10000
+#define TIME_OUT_DHCP	  				15000
+
+#define WIFI_DHCP_Try	        3
+#define WIFI_WIFI_Join_Try	  3
+#define DNS_IP_Try	          3
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -31,6 +37,8 @@
 /**@For User Config ***********************************************************/
 const char * SSID="myLoad";
 const char * SSID_password="0912345678";
+//const char * SSID="Wei";
+//const char * SSID_password="50882056";
 const char * AWS_endpoint="av9pn5o54ct6w-ats.iot.ap-northeast-1.amazonaws.com";
 
 
@@ -41,9 +49,11 @@ const char * MQTT_username="username";
 const char * MQTT_password="password";
 const char * MQTT_client_port="5503";
 
-const char * MQTT_Sub_Topic="yztek/ty002/d/NECCUIUaAZDC";
-const char * MQTT_Pub_Topic="yztek/ty002/s";
+const char * MQTT_keep_alive_interval="80";
+const char * MQTT_En_clean_session="1";
+const char * MQTT_En_keep_alive_interval="1";
 /*******************************************************************************/
+const char * MQTT_DISCONNECT="mqtt=8";
 
 const RSI_AT_COMMAND_t rsi_cmd=
 {
@@ -62,7 +72,7 @@ const RSI_AT_COMMAND_t rsi_cmd=
 	.WiFI_Scan="scan=",
 	.PSK="psk=",
 	.WIFI_Join="join=",
-	.S_IPconfig="ipconf=",
+	.IPconfig="ipconf=",
 	.DnsGet="dnsget=",
 	.MQTT="mqtt=",
 };
@@ -75,13 +85,15 @@ static RSI_AT_COMMAND_PARAMETER_t rsi_data=
 	.WiFI_Scan="0,",
 	.PSK="1,",
 	.WIFI_Join=",0,2,2,2,1000,0,0",
-	.S_IPconfig="1,0,0,0",
+	.IPconfig="1,0,0,0",
 	.DnsGet=",1",
-	.S_MQTT_Con="1",
-	.MQTT_Sub="2",
-	.MQTT_Pub="3",
-	.MQTT_unSub="8",
-	.S_MQTT_delete="9",
+	.MQTT_Init="1,4,",
+	.MQTT_Con="2,1,1,0,0,0,0,0,",
+	.MQTT_Sub="3,",
+	.MQTT_Pub="4,",
+	.MQTT_unSub="4",
+	.MQTT_disCon="8",
+	.MQTT_delete="9",
 };
 #ifdef RF_MODULE
 
@@ -90,8 +102,9 @@ static RSI_AT_COMMAND_PARAMETER_t rsi_data=
 static RF_Ctrl_t rf;
 /*For RS9116 AT Command*/
 /************************ Private functions Prototype************************/
-
+bool BSP_RF_Decode_DNS(void);
 DMA_Status_t BSP_RF_Get_DMA_RX_Status(void);
+void BSP_RF_Clear_buffer(uint8_t *buffer,uint16_t length);
 
 /************************ Private functions implementation************************/
 
@@ -106,18 +119,32 @@ DMA_Status_t BSP_RF_Get_DMA_RX_Status(void);
 void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
 {
 	rf.AT_respond=None;
-	if(memcmp((void *)(rf.m_rx_buf),(void *)rsi_cmd.OK,2)==0)
+	for(uint8_t i=0;i<strlen(rf.m_rx_buf);i++)
 	{
-		rf.AT_respond=OK;
-		memset(rf.m_rx_buf, '\0', strlen(rf.m_rx_buf));	//clearerr rx buffer
-
+		if(*(rf.m_rx_buf+i)=='O'&&*(rf.m_rx_buf+i+1)=='K')
+		{
+			rf.AT_respond=OK;
+			break;
+		}
+		else if(memcmp((void *)(rf.m_rx_buf+i),(void *)rsi_cmd.Error,5)==0)
+		{
+	  	rf.AT_respond=Error;
+	  	rf.error_code=AT_Respond_Error;		
+		
+		}
+			
+	
 	}
-	else if(memcmp((void *)(rf.m_rx_buf),(void *)rsi_cmd.Error,5)==0)
-	{
-				rf.AT_respond=Error;
-				rf.error_code=AT_Respond_Error;
+//	if(memcmp((void *)(rf.m_rx_buf),(void *)rsi_cmd.OK,2)==0)
+//	{
+//		rf.AT_respond=OK;
+//	}
+//	else if(memcmp((void *)(rf.m_rx_buf),(void *)rsi_cmd.Error,5)==0)
+//	{
+//		rf.AT_respond=Error;
+//		rf.error_code=AT_Respond_Error;
 
-	}
+//	}
 	if(rf.AT_respond==OK)
 	{
 			switch(rf.rs_state)
@@ -147,30 +174,34 @@ void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
 							BSP_RF_set_status(S_Join_WIFI);			
 					break;
 				case S_Join_WIFI:	
-							BSP_RF_set_status(S_IPconfig);					
+							BSP_RF_set_status(S_is_WIFI_Connected);					
 					break;	
-				case S_IPconfig:
-							BSP_RF_set_status(S_DNS_get);
+				case S_is_WIFI_Connected:
+							if(BSP_RF_Decode_DNS()==true)
+							{
+								BSP_RF_set_status(S_DNS_get);
+							}
 					break;
 				case S_DNS_get:
-							BSP_RF_set_status(S_MQTT_Init);
+							
+								BSP_RF_set_status(S_MQTT_Init);
 					break;
 				case S_MQTT_Init:
 							BSP_RF_set_status(S_MQTT_Con);
 					break;	
 				case S_MQTT_Con:
-							//BSP_RF_set_status(S_MQTT_disCon);
+					    if(memcmp((void *)(rf.m_tx_buf),(void *)MQTT_DISCONNECT,6)==0)
+							{
+								BSP_RF_set_status(S_is_WIFI_Connected);
+							}
 					break;
-				case S_MQTT_disCon:
-						//BSP_RF_set_status(S_MQTT_delete);
-					break;
-				case S_MQTT_delete:
-							//BSP_RF_set_status(S_LowerPowerMode);
-					break;			
+
+		
 				case S_LowerPowerMode:
-							//BSP_RF_set_status(S_Set_opermode);
 					break;		
 			}
+			BSP_RF_Clear_buffer((uint8_t *)rf.m_rx_buf,strlen(rf.m_rx_buf));//clearerr rx buffer
+
   }
 }
 
@@ -295,7 +326,56 @@ DMA_Status_t BSP_RF_Get_DMA_RX_Status(void)
 		DMA_Status_t a=(DMA_Status_t)DMA_RX_Status();
 		return a;
 }
+/**
+  *@brief  Decode DNS Ip form AT Command , and store in MQTT_t
+  *@param  Buffer : RX buffer 
+	*@retval true if success
+  *@author YZTEK Wilson
+  *
+  */
+bool BSP_RF_Decode_DNS(void)
+{
+	uint16_t i=0;
+  uint8_t check[4]={0,0,0,0};
+	if( (rf.m_rx_buf[0]=='O') && (rf.m_rx_buf[1]=='K') )
+	{
+		if(rf.m_rx_buf[4]==2)
+		{
+			for(i=0;i<4;i++)
+			{
+				
+				rf.MQTT.DNS_IP_hex[i]=rf.m_rx_buf[i+6];
+			}
+		}
+	}
+	/*Check DNS exsit*/
+	if(  memcmp((void *)(rf.MQTT.DNS_IP_hex),(void *)check,4)==0  )
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
 
+
+
+
+
+/**
+  *@brief  Return String length in ASCII
+  *@param  Buffer :  buffer 
+  *@retval string : Length (ASCII form) 
+  *@author YZTEK Wilson
+  *
+  */
+void BSP_RF_Get_String_Length(const char * Buffer)
+{
+		uint8_t length=0;
+	  length=strlen(Buffer);
+		sprintf(rf.data_length,"%d",length);
+}
 /************************ Exported function implementation************************/
 
 /**
@@ -316,38 +396,41 @@ bool BSP_RF_RS9116_Init(void)
 	BSP_RF_AT_Send_Char('U');
 	HAL_Delay(1000);
 	BSP_RF_AT_Send_Char('1');
-	HAL_Delay(1000);
+	HAL_Delay(2000);
 	BSP_RF_set_status(S_Booting);
 	/*Operation mode*/	   
 	memset(rf.m_tx_buf, '\0', strlen((char *)rf.m_tx_buf));	
 	strcat(rf.m_tx_buf, rsi_cmd.OperMode);
 	strcat(rf.m_tx_buf, rsi_data.OperMode);
-	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Set_opermode,ATtimeout_ms);
+	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Set_opermode,TIME_OUT_NORMAL);
+
   /*Feat */
 	memset(rf.m_tx_buf, '\0', strlen((char *)rf.m_tx_buf));	
 	strcat(rf.m_tx_buf, rsi_cmd.Frame);
-	strcat(rf.m_tx_buf, rsi_data.OperMode);		
-	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Set_feat,ATtimeout_ms);
+	strcat(rf.m_tx_buf, rsi_data.Frame);		
+	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Set_feat,TIME_OUT_NORMAL);
+
   /*Band */
 	memset(rf.m_tx_buf, '\0', strlen((char *)rf.m_tx_buf));	
 	strcat(rf.m_tx_buf, rsi_cmd.Band);
 	strcat(rf.m_tx_buf, rsi_data.Band);		
-	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Set_band,ATtimeout_ms);
+	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Set_band,TIME_OUT_NORMAL);
+
   /*Init */
 	memset(rf.m_tx_buf, '\0', strlen((char *)rf.m_tx_buf));	
 	strcat(rf.m_tx_buf, rsi_cmd.Init);
-	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Init,ATtimeout_ms);
-	bool flag;
+	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Init,TIME_OUT_NORMAL);
+
+
 	if(rf.rs_state==S_Init)
 	{
-			flag=true;
+			return true;
 	}
 	else
 	{
-			flag=false;
+		 return false;
 
 	}
-	return flag;
 }
 /**
   *@brief  Connect to WIFI host 
@@ -358,59 +441,66 @@ bool BSP_RF_RS9116_Init(void)
   */
 bool BSP_RF_RS9116_WIFI_Connect(void)
 {
-
-    /*WIFI_Scan */
-		while(BSP_RF_get_module_status()==S_Init)
+    /*Check module status */
+		if(BSP_RF_get_module_status()!=S_Init)
 		{
-			memset(rf.m_tx_buf, '\0', strlen((char *)rf.m_tx_buf));	
-			strcat(rf.m_tx_buf, rsi_cmd.AT_RSI_);
-			strcat(rf.m_tx_buf, rsi_cmd.WiFI_Scan);
-			strcat(rf.m_tx_buf, rsi_data.WiFI_Scan);	
-			strcat(rf.m_tx_buf, SSID);		
-			strcat(rf.m_tx_buf, rsi_cmd.Newline);		
-			
-			BSP_UART_TransmitBlocking((uint8_t *)rf.m_tx_buf,strlen(rf.m_tx_buf),100);
-			BSP_RF_Start_dma_receive();
-			uint32_t last_time=HAL_GetTick();
-				while(1)
-				{
-					}
-	
-	
-			//BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Scan_WIFI,WIFI_CONNECT_timeout_ms);
-		}
+			return false;
+		}			
+    /*WIFI_Scan */
+
+		memset(rf.m_tx_buf, '\0', strlen((char *)rf.m_tx_buf));	
+		strcat(rf.m_tx_buf, rsi_cmd.WiFI_Scan);
+		strcat(rf.m_tx_buf, rsi_data.WiFI_Scan);	
+		strcat(rf.m_tx_buf, SSID);		
+		BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Scan_WIFI,TIME_OUT_WIFI_CONNECT);
+
 		/*WIFI_PSK */
 	  memset(rf.m_tx_buf, '\0', strlen((char *)rf.m_tx_buf));	
 		strcat(rf.m_tx_buf, rsi_cmd.PSK);
 		strcat(rf.m_tx_buf, rsi_data.PSK);
 		strcat(rf.m_tx_buf, SSID_password);	
-	  BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Set_psk,WIFI_CONNECT_timeout_ms);
+	  BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Set_psk,TIME_OUT_WIFI_CONNECT);
 		/*WIFI_Join */
-	  memset(rf.m_tx_buf, '\0', strlen((char *)rf.m_tx_buf));	
-		strcat(rf.m_tx_buf, SSID_password);	
-		strcat(rf.m_tx_buf, rsi_cmd.WIFI_Join);
-		strcat(rf.m_tx_buf, rsi_data.WIFI_Join);		
-	  BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Join_WIFI,WIFI_CONNECT_timeout_ms);
+    while(BSP_RF_get_module_status()==S_Set_psk)
+		{
+			static uint8_t WIFI_Join_try=0;
+
+			memset(rf.m_tx_buf, '\0', strlen((char *)rf.m_tx_buf));	
+			strcat(rf.m_tx_buf, rsi_cmd.WIFI_Join);
+			strcat(rf.m_tx_buf, SSID);	
+			strcat(rf.m_tx_buf, rsi_data.WIFI_Join);		
+			BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Join_WIFI,TIME_OUT_WIFI_CONNECT);
+			WIFI_Join_try++;
+			if(WIFI_Join_try==WIFI_WIFI_Join_Try)
+			{
+				rf.error_code=WIFI_Join_Error;
+				break;
+			}
+		}		
 		/*DCHP */
 		while(BSP_RF_get_module_status()==S_Join_WIFI)
 		{
+			static uint8_t DCPH_try=0;
 			memset(rf.m_tx_buf, '\0', strlen((char *)rf.m_tx_buf));	
-			strcat(rf.m_tx_buf, rsi_cmd.S_IPconfig);
-			strcat(rf.m_tx_buf, rsi_data.S_IPconfig);		
-			BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_IPconfig,WIFI_CONNECT_timeout_ms);
-			
+			strcat(rf.m_tx_buf, rsi_cmd.IPconfig);
+			strcat(rf.m_tx_buf, rsi_data.IPconfig);		
+			BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_is_WIFI_Connected,TIME_OUT_DHCP);
+			DCPH_try++;
+			if(DCPH_try==WIFI_DHCP_Try)
+			{
+				rf.error_code=DHCP_Error;
+			  break;
+			}
 		}
-		bool flag;
-		if(rf.rs_state==S_IPconfig)
+		if(rf.rs_state==S_is_WIFI_Connected)
 		{
-				flag=true;
+				return true;
 		}
 		else
 		{
-				flag=false;
+			 return false;
 
 		}
-		return flag;
 }
 /**
   *@brief  Connect to AWS MQTT broker
@@ -420,48 +510,140 @@ bool BSP_RF_RS9116_WIFI_Connect(void)
   *
   */
 bool BSP_RF_RS9116_MQTT_Connect(void)
+{		
+	   /**@TBD Why can'y using char *   */
+		
+    /*Check module status */
+		if(BSP_RF_get_module_status()!=S_is_WIFI_Connected)
+		{
+			return false;			
+		}
+		while(BSP_RF_get_module_status()==S_is_WIFI_Connected)
+		{
+			static uint8_t DNS_IP_try=0;
+
+			/*DNS_Get */
+			memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
+			strcat(rf.m_tx_buf, rsi_cmd.DnsGet);
+			strcat(rf.m_tx_buf, AWS_endpoint);		
+			strcat(rf.m_tx_buf, rsi_data.DnsGet);	
+			BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_DNS_get,TIME_OUT_WIFI_CONNECT);
+			/*Transform from hex to string*/
+			sprintf(rf.MQTT.DNS_IP_String, "%d.%d.%d.%d", rf.MQTT.DNS_IP_hex[0], rf.MQTT.DNS_IP_hex[1], rf.MQTT.DNS_IP_hex[2], rf.MQTT.DNS_IP_hex[3]);
+			DNS_IP_try++;
+			if(DNS_IP_try==DNS_IP_Try)
+			{
+				rf.error_code=DNS_IP_lost;
+				break;
+			}
+		
+		}
+		/*MQTT_Init */
+
+		memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
+		strcat(rf.m_tx_buf, rsi_cmd.MQTT);
+		strcat(rf.m_tx_buf, rsi_data.MQTT_Init);		
+		strcat(rf.m_tx_buf, rf.MQTT.DNS_IP_String);
+		strcat(rf.m_tx_buf, ",");
+		strcat(rf.m_tx_buf, MQTT_Server_Port);
+		strcat(rf.m_tx_buf, ",");
+    BSP_RF_Get_String_Length(Device_ID);
+		strcat(rf.m_tx_buf, rf.data_length);
+		strcat(rf.m_tx_buf, ",");
+		strcat(rf.m_tx_buf, Device_ID);
+		strcat(rf.m_tx_buf, ",");
+		strcat(rf.m_tx_buf, MQTT_keep_alive_interval);
+		strcat(rf.m_tx_buf, ",");
+    BSP_RF_Get_String_Length(MQTT_username);
+		strcat(rf.m_tx_buf, rf.data_length);
+		strcat(rf.m_tx_buf, ",");
+		strcat(rf.m_tx_buf, MQTT_username);
+		strcat(rf.m_tx_buf, ",");
+    BSP_RF_Get_String_Length(MQTT_password);
+		strcat(rf.m_tx_buf, rf.data_length);
+		strcat(rf.m_tx_buf, ",");
+		strcat(rf.m_tx_buf, MQTT_password);
+		strcat(rf.m_tx_buf, ",");
+		strcat(rf.m_tx_buf, MQTT_En_clean_session);
+		strcat(rf.m_tx_buf, ",");
+		strcat(rf.m_tx_buf, MQTT_En_keep_alive_interval);
+		strcat(rf.m_tx_buf, ",");
+		strcat(rf.m_tx_buf, MQTT_client_port);
+		BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_MQTT_Init,TIME_OUT_MQTT);
+
+		/*MQTT_MQTT_Con */
+		memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
+		strcat(rf.m_tx_buf, rsi_cmd.MQTT);
+		strcat(rf.m_tx_buf, rsi_data.MQTT_Con);
+		BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_MQTT_Con,TIME_OUT_MQTT);
+
+	if(rf.rs_state==S_MQTT_Con)
+	{
+			return true;
+	}
+	else
+	{
+		 return false;
+
+	}
+}
+/**
+  *@brief  DisConnect to AWS MQTT broker
+  *@param  None
+	*@retval True if successful Connect
+  *@author YZTEK Wilson
+  *
+  */
+bool BSP_RF_RS9116_MQTT_DisConnect(void)
 {
 
+	memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
+	strcat(rf.m_tx_buf, rsi_cmd.MQTT);
+	strcat(rf.m_tx_buf, rsi_data.MQTT_disCon);
+	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_is_WIFI_Connected,TIME_OUT_MQTT);
+	if(rf.rs_state==S_is_WIFI_Connected)
+	{
+			return true;
+	}
+	else
+	{
+		 return false;
 
-		/*DNS_Get */
-		memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
-		strcat(rf.m_tx_buf, rsi_cmd.DnsGet);
-		strcat(rf.m_tx_buf, AWS_endpoint);		
-		strcat(rf.m_tx_buf, rsi_data.DnsGet);	
-		while(1)
-		{
-			BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_MQTT_Con,WIFI_CONNECT_timeout_ms);
-			if(rf.AT_respond==OK)
-			{
-         break;			
-			}
-		}
-//		/*MQTT_Init */
-//		memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
-//		strcat(AT_Send_buffer, rsi_cmd.DnsGet);
-//		strcat(AT_Send_buffer, AWS_endpoint);		
-//		strcat(AT_Send_buffer, rsi_data.DnsGet);
-//		BSP_RF_AT_Command_Communication(rf.m_tx_buf);	
-
-
-//		/*MQTT_MQTT_Con */
-//		memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
-//		strcat(rf.m_tx_buf, RSI_AT_MQTT);
-//		strcat(rf.m_tx_buf, RSI_AT_MQTT_Con_parameter);		
-//		BSP_RF_AT_Command_Communication(rf.m_tx_buf);	
-		bool flag;
-		if(rf.rs_state==S_MQTT_Con)
-		{
-				flag=true;
-		}
-		else
-		{
-				flag=false;
-
-		}
-		return flag;
+	}
 }
+/**
+  *@brief  Publish to AWS MQTT broker
+  *@param  None
+	*@retval True if successful Connect
+  *@author YZTEK Wilson
+  *
+  */
+bool BSP_RF_RS9116_MQTT_Publish(char * Topic,char * data)
+{
 
+	memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
+	strcat(rf.m_tx_buf, rsi_cmd.MQTT);
+	strcat(rf.m_tx_buf, rsi_data.MQTT_Pub);
+	BSP_RF_Get_String_Length(Topic);
+	strcat(rf.m_tx_buf, rf.data_length);
+	strcat(rf.m_tx_buf, ",");	
+	strcat(rf.m_tx_buf, Topic);	
+	strcat(rf.m_tx_buf, ",1,0,");	
+	BSP_RF_Get_String_Length(data);
+	strcat(rf.m_tx_buf, rf.data_length);
+	strcat(rf.m_tx_buf, ",");	
+	strcat(rf.m_tx_buf, data);
+	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_MQTT_Con,TIME_OUT_MQTT);
+	if(rf.rs_state==S_is_WIFI_Connected)
+	{
+			return true;
+	}
+	else
+	{
+		 return false;
+
+	}
+}
 /**
   *@brief  BSP for Setting RF module Status
   *@param  RS9116_State_t

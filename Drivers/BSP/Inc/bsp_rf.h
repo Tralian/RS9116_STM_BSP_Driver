@@ -27,8 +27,8 @@
 /* Exported macro ------------------------------------------------------------*/
 
 
-#define TX_BUFFER_SIZE		70
-#define RX_BUFFER_SIZE	  150
+#define TX_BUFFER_SIZE		100
+#define RX_BUFFER_SIZE	  170
 /* Exported types ------------------------------------------------------------*/
 /**@AT Command Struct*/
 typedef struct 
@@ -48,7 +48,7 @@ typedef struct
 	  char * WiFI_Scan;
 	  char * PSK;
 		char * WIFI_Join;
-		char * S_IPconfig;
+		char * IPconfig;
 		char * DnsGet;
 		char * MQTT;
 		
@@ -63,14 +63,15 @@ typedef struct
 	  char * WiFI_Scan;
 	  char * PSK;
 		char * WIFI_Join;
-		char * S_IPconfig;
+		char * IPconfig;
 		char * DnsGet;
-		char * S_MQTT_Con;
+	  char * MQTT_Init;
+		char * MQTT_Con;
 	  char * MQTT_Sub;
 	  char * MQTT_Pub;
 	  char * MQTT_unSub;
-	  char * S_MQTT_disCon;
-	  char * S_MQTT_delete;
+	  char * MQTT_disCon;
+	  char * MQTT_delete;
 }RSI_AT_COMMAND_PARAMETER_t;
 
 
@@ -100,12 +101,10 @@ typedef enum
 		S_Scan_WIFI,
 		S_Set_psk,
 		S_Join_WIFI,
-		S_IPconfig,
+		S_is_WIFI_Connected,
 		S_DNS_get,
 		S_MQTT_Init,
 		S_MQTT_Con,
-		S_MQTT_disCon,
-		S_MQTT_delete,
 		S_LowerPowerMode,
 
 }RS9116_State_t;
@@ -116,26 +115,29 @@ typedef enum
 	None_error=0x00,	
 	Commmunication_Timeout,
 	AT_Respond_Error,
+	WIFI_Join_Error,
+	DHCP_Error,
+	DNS_IP_lost,
+	
 }RS9116_ERROR_t;
 /**@MQTT infor */
 
 typedef struct
 {
+  uint8_t DNS_IP_hex[4];
+	char    DNS_IP_String[15];
 	uint8_t Num_SubScribe_Topic;
-	char *  Sub_Topic_nmae;
-	uint8_t Num_PubScribe_Topic;
-	char *  Pub_Topic_nmae;
-  /*Need add Topic ,Can Export here*/
 }MQTT_t;
 
 typedef struct
 {	
 	RS9116_State_t rs_state;
-	MQTT_t Topic;
+	MQTT_t MQTT;
 	RS9116_ERROR_t error_code;
 	AT_respond_t AT_respond;
 	char   m_tx_buf[TX_BUFFER_SIZE] ;
 	char   m_rx_buf[RX_BUFFER_SIZE] ;
+	char   data_length[3];
 }RF_Ctrl_t;
 
 /* Exported constants --------------------------------------------------------*/
@@ -146,9 +148,9 @@ bool BSP_RF_RS9116_Init(void);
 bool BSP_RF_RS9116_WIFI_Connect(void);
 bool BSP_RF_RS9116_MQTT_Connect(void);
 bool BSP_RF_RS9116_MQTT_DisConnect(void);
-bool BSP_RF_RS9116_MQTT_Subcribe(void);
-bool BSP_RF_RS9116_MQTT_UnSubcribe(void);
-bool BSP_RF_RS9116_MQTT_Publish(void);
+bool BSP_RF_RS9116_MQTT_Subcribe(char * Topic);
+bool BSP_RF_RS9116_MQTT_UnSubcribe(char * Topic);
+bool BSP_RF_RS9116_MQTT_Publish(char * Topic,char * data);
 
 
 void BSP_RF_set_status(RS9116_State_t stage);

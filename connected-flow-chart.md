@@ -1,4 +1,4 @@
-# Tutorial : RS9116 Connect to AWS using MQTT Library implement
+# Tutorial : RS9116 Connect to AWS using MQTT \(AT Command Library implement by STM\)
 
 
 

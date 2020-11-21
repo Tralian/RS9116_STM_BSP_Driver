@@ -10,7 +10,7 @@ Redpine have abundant example coed with WIFI host, but most of that are is for s
 
 ## Why Opensource 
 
-I'm working at a Start-upCompany in Taiwan ,I'm very new at HW and FW design, but need lead  whole project\(actually only me in the team at beginning\), you can image that how hopeless and helpless at that period
+I'm working at a Start-up Company in Taiwan ,I'm very new at HW and FW design, but need lead  whole project\(actually only me in the team at beginning\), you can image that how hopeless and helpless at that period
 
  Luckly, I met my mentor  Zhih-Tai, Liu\(He also have a [Electro-Hedgehog](https://www.tasker.com.tw/workroom/3KWQr) in Tasker \)last year , He teach me a lot at HW designed and FW structure. We often excitedly discussing some designed over and over again 
 

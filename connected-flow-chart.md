@@ -8,7 +8,7 @@
 
 ##  1.RS9116 EVM Firmware update
 
-Need  update  EVM FW  , it can reference silicon lab opensource document.
+When star you project Need  update  EVM FW at first\( Different FW version will effect AT Command parameter\)  , it can reference silicon lab opensource document.
 
  [AN1290: RS9116W Firmware Update Application Note](https://www.silabs.com/documents/login/application-notes/an1290-rs9116w-firmware-update-application-note.pdf)
 
@@ -51,9 +51,9 @@ const char * MQTT_Pub_Topic="topic/Publish";
 
 
 
-## 4.Application Test
+## 4.Test
 
-Unfortunately, In RS9116 EVM Board don't have TX/RX pinout\(can't bypass form USB virtual comport driver like cp2302 \), I try connect GPIO\_8 \(RSI9116 TX\),GPIO\_9 \(RSI9116 RX\) by jumper . and USB port just plug in Power port . But still have some bug and unstable\(If have better solutionplease tell me\)
+Unfortunately, In RS9116 EVM Board don't have TX/RX pinout\(can't bypass form USB virtual comport driver like cp2302 \), I try connect GPIO\_8 \(RSI9116 TX\),GPIO\_9 \(RSI9116 RX\) by jumper . and USB port just plug in Power port . But still have some bug and unstable\(If have better solution please tell me\)
 
 ![RS9116 EVM Sch ](.gitbook/assets/image%20%282%29.png)
 

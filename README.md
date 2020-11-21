@@ -6,7 +6,7 @@ Recently. I'm study low power consumption module for WI-FI application, I using 
 
 ## Why write library by myself
 
-Redpine have abundant example coed with WIFI host, but most of that are is for sapis communicate, and Redpine library is coding base on  Free RTOS ,In my application, just using bare metal is enough\(less code size and better power consumption \).so I decide write a library myself 
+Redpine have abundant example coed with WIFI host, but most of that are is for sapis communicate, and Redpine library is coding base on  Free RTOS ,In my application, using bare metal environment is enough\(less code size and better power consumption \).so I decide write a library myself 
 
 ## Why Opensource 
 

@@ -42,6 +42,15 @@ const char * MQTT_En_clean_session="1";
 const char * MQTT_En_keep_alive_interval="1";
 ```
 
+### 4.Config MQTT Topic in main c
+
+```c
+const char * MQTT_Sub_Topic="topic/Subcribe";
+const char * MQTT_Pub_Topic="topic/Publish";
+```
+
+
+
 ## 4.Application Test
 
 Unfortunately, In RS9116 EVM Board don't have TX/RX pinout\(can't bypass form USB virtual comport driver like cp2302 \), I try connect GPIO\_8 \(RSI9116 TX\),GPIO\_9 \(RSI9116 RX\) by jumper . and USB port just plug in Power port . But still have some bug and unstable\(If have better solutionplease tell me\)

@@ -1,4 +1,4 @@
-# Tutorial : RS9116 Connect to AWS using MQTT \(AT Command Library implement by STM\)
+# Tutorial : RS9116 Connect to AWS using MQTT \(UART Library implement by STM\)
 
 
 
@@ -32,12 +32,10 @@ In the end I wrote a python script, just simple exchange data between two virtua
 
 ![Serial data exchange Block diagram ](.gitbook/assets/image%20%283%29.png)
 
-So using this python script, In Hardware setting   just connect STM and RSI 9116 EVM  in USB port .After Execute python script can start your project
+So using this python script, In Hardware setting   just connect STM and RSI 9116 EVM  in USB port .After Execute python script , chose you comport ,then you can start your project
 
+![python script screen shot](.gitbook/assets/image%20%284%29.png)
 
-
-##  
-
-Un  
+  
 
 

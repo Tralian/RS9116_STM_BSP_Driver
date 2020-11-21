@@ -51,6 +51,17 @@ const char * MQTT_Pub_Topic="topic/Publish";
 
 
 
+### 5.Config MQTT Topic in main c
+
+```c
+	BSP_RF_RS9116_Init();
+  BSP_RF_RS9116_WIFI_Connect();
+  BSP_RF_RS9116_MQTT_Connect();
+  
+  HAL_Delay(5000);
+  BSP_RF_RS9116_MQTT_DisConnect();
+```
+
 ## 4.Test
 
 Unfortunately, In RS9116 EVM Board don't have TX/RX pinout\(can't bypass form USB virtual comport driver like cp2302 \), I try connect GPIO\_8 \(RSI9116 TX\),GPIO\_9 \(RSI9116 RX\) by jumper . and USB port just plug in Power port . But still have some bug and unstable\(If have better solution please tell me\)

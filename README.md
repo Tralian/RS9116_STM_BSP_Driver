@@ -1,4 +1,4 @@
-# Initial page
+# Tutorials
 
 ## Why I choose Redpine RSI9116
 

@@ -88,14 +88,9 @@ void BSP_UART_DeInit(void);
 void BSP_UART_TransmitDMA(uint8_t *byte_array, uint8_t size);
 void BSP_UART_TransmitBlocking(uint8_t *byte_array, uint8_t size, uint16_t timeout_ms);
 void BSP_UART_ReceiveDMA(uint8_t *byte_array, uint8_t size);
-void BSP_UART_Receive_Mode_DMA_IDEL_IT(uint8_t *byte_array);
-
-//bool BSP_UART_ReceiveDMACplt(void);
 bool BSP_UART_ReceiveBlocking(uint8_t *byte_array, uint8_t size, uint16_t timeout_ms);
 void BSP_UART_StopDMA(void);
 
-
-void DMA_IDEL_IT_Get_data(void);
 
 bool DMA_RX_Status(void);
 
@@ -103,7 +98,6 @@ bool DMA_RX_Status(void);
 /* Linker functions ------------------------------------------------------- */
 
 /**@brief External linker function to be implemented */
-void BSP_UART_RX_DMA_Handler(uint16_t data_len);
 void BSP_UART_Error_Handler(void);
 
 #endif	/* USE_UART */

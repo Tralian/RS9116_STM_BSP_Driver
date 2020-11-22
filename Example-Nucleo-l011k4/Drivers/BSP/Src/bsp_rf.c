@@ -19,12 +19,17 @@
 #include "bsp_uart.h"
 
 /* Private typedef -----------------------------------------------------------*/
+typedef enum
+{
+	 DONE=  0x00,
+	 BUSY,
+}DMA_Status_t;
 
 /* Private define ------------------------------------------------------------*/
-#define TIME_OUT_NORMAL	  5000
-#define TIME_OUT_WIFI_CONNECT	  10000
-#define TIME_OUT_MQTT	  				10000
-#define TIME_OUT_DHCP	  				15000
+#define TIME_OUT_NORMAL_MS	        5000
+#define TIME_OUT_WIFI_CONNECT_MS	  10000
+#define TIME_OUT_MQTT_MS	  				10000
+#define TIME_OUT_DHCP_MS	  				15000
 
 #define WIFI_DHCP_Try	        3
 #define WIFI_WIFI_Join_Try	  3
@@ -118,34 +123,23 @@ void BSP_RF_Clear_buffer(uint8_t *buffer,uint16_t length);
   */
 void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
 {
-	rf.AT_respond=None;
+	/*Find RX buffer keyword*/
 	for(uint8_t i=0;i<strlen(rf.m_rx_buf);i++)
 	{
 		if(*(rf.m_rx_buf+i)=='O'&&*(rf.m_rx_buf+i+1)=='K')
 		{
-			rf.AT_respond=OK;
+	  	rf.error_code=None_error;		
 			break;
 		}
 		else if(memcmp((void *)(rf.m_rx_buf+i),(void *)rsi_cmd.Error,5)==0)
 		{
-	  	rf.AT_respond=Error;
 	  	rf.error_code=AT_Respond_Error;		
-		
+			break;
 		}
 			
 	
 	}
-//	if(memcmp((void *)(rf.m_rx_buf),(void *)rsi_cmd.OK,2)==0)
-//	{
-//		rf.AT_respond=OK;
-//	}
-//	else if(memcmp((void *)(rf.m_rx_buf),(void *)rsi_cmd.Error,5)==0)
-//	{
-//		rf.AT_respond=Error;
-//		rf.error_code=AT_Respond_Error;
-
-//	}
-	if(rf.AT_respond==OK)
+	if(	 rf.error_code==None_error)
 	{
 			switch(rf.rs_state)
 			{
@@ -203,6 +197,11 @@ void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
 			BSP_RF_Clear_buffer((uint8_t *)rf.m_rx_buf,strlen(rf.m_rx_buf));//clearerr rx buffer
 
   }
+	else
+	{
+	 /**@TBD Need have error handler*/
+	
+	}
 }
 
 
@@ -265,7 +264,7 @@ void BSP_RF_AT_Command_Communication(const char * command,RS9116_State_t Next_St
 	uint32_t last_time=HAL_GetTick();
 	while(1)
 	{
-		/**@TBD Can do something here*/
+		/**@TBD Can do something here while DMA wating */
 		if(HAL_GetTick()-last_time>timeout)
 		{
 			rf.error_code=Commmunication_Timeout;
@@ -374,7 +373,7 @@ void BSP_RF_Get_String_Length(const char * Buffer)
 {
 		uint8_t length=0;
 	  length=strlen(Buffer);
-		sprintf(rf.data_length,"%d",length);
+		sprintf(rf.string_data_length,"%d",length);
 }
 /************************ Exported function implementation************************/
 
@@ -402,24 +401,24 @@ bool BSP_RF_RS9116_Init(void)
 	memset(rf.m_tx_buf, '\0', strlen((char *)rf.m_tx_buf));	
 	strcat(rf.m_tx_buf, rsi_cmd.OperMode);
 	strcat(rf.m_tx_buf, rsi_data.OperMode);
-	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Set_opermode,TIME_OUT_NORMAL);
+	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Set_opermode,TIME_OUT_NORMAL_MS);
 
   /*Feat */
 	memset(rf.m_tx_buf, '\0', strlen((char *)rf.m_tx_buf));	
 	strcat(rf.m_tx_buf, rsi_cmd.Frame);
 	strcat(rf.m_tx_buf, rsi_data.Frame);		
-	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Set_feat,TIME_OUT_NORMAL);
+	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Set_feat,TIME_OUT_NORMAL_MS);
 
   /*Band */
 	memset(rf.m_tx_buf, '\0', strlen((char *)rf.m_tx_buf));	
 	strcat(rf.m_tx_buf, rsi_cmd.Band);
 	strcat(rf.m_tx_buf, rsi_data.Band);		
-	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Set_band,TIME_OUT_NORMAL);
+	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Set_band,TIME_OUT_NORMAL_MS);
 
   /*Init */
 	memset(rf.m_tx_buf, '\0', strlen((char *)rf.m_tx_buf));	
 	strcat(rf.m_tx_buf, rsi_cmd.Init);
-	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Init,TIME_OUT_NORMAL);
+	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Init,TIME_OUT_NORMAL_MS);
 
 
 	if(rf.rs_state==S_Init)
@@ -452,14 +451,14 @@ bool BSP_RF_RS9116_WIFI_Connect(void)
 		strcat(rf.m_tx_buf, rsi_cmd.WiFI_Scan);
 		strcat(rf.m_tx_buf, rsi_data.WiFI_Scan);	
 		strcat(rf.m_tx_buf, SSID);		
-		BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Scan_WIFI,TIME_OUT_WIFI_CONNECT);
+		BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Scan_WIFI,TIME_OUT_WIFI_CONNECT_MS);
 
 		/*WIFI_PSK */
 	  memset(rf.m_tx_buf, '\0', strlen((char *)rf.m_tx_buf));	
 		strcat(rf.m_tx_buf, rsi_cmd.PSK);
 		strcat(rf.m_tx_buf, rsi_data.PSK);
 		strcat(rf.m_tx_buf, SSID_password);	
-	  BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Set_psk,TIME_OUT_WIFI_CONNECT);
+	  BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Set_psk,TIME_OUT_WIFI_CONNECT_MS);
 		/*WIFI_Join */
     while(BSP_RF_get_module_status()==S_Set_psk)
 		{
@@ -469,7 +468,7 @@ bool BSP_RF_RS9116_WIFI_Connect(void)
 			strcat(rf.m_tx_buf, rsi_cmd.WIFI_Join);
 			strcat(rf.m_tx_buf, SSID);	
 			strcat(rf.m_tx_buf, rsi_data.WIFI_Join);		
-			BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Join_WIFI,TIME_OUT_WIFI_CONNECT);
+			BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_Join_WIFI,TIME_OUT_WIFI_CONNECT_MS);
 			WIFI_Join_try++;
 			if(WIFI_Join_try==WIFI_WIFI_Join_Try)
 			{
@@ -484,7 +483,7 @@ bool BSP_RF_RS9116_WIFI_Connect(void)
 			memset(rf.m_tx_buf, '\0', strlen((char *)rf.m_tx_buf));	
 			strcat(rf.m_tx_buf, rsi_cmd.IPconfig);
 			strcat(rf.m_tx_buf, rsi_data.IPconfig);		
-			BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_is_WIFI_Connected,TIME_OUT_DHCP);
+			BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_is_WIFI_Connected,TIME_OUT_DHCP_MS);
 			DCPH_try++;
 			if(DCPH_try==WIFI_DHCP_Try)
 			{
@@ -510,9 +509,7 @@ bool BSP_RF_RS9116_WIFI_Connect(void)
   *
   */
 bool BSP_RF_RS9116_MQTT_Connect(void)
-{		
-	   /**@TBD Why can'y using char *   */
-		
+{				
     /*Check module status */
 		if(BSP_RF_get_module_status()!=S_is_WIFI_Connected)
 		{
@@ -527,7 +524,7 @@ bool BSP_RF_RS9116_MQTT_Connect(void)
 			strcat(rf.m_tx_buf, rsi_cmd.DnsGet);
 			strcat(rf.m_tx_buf, AWS_endpoint);		
 			strcat(rf.m_tx_buf, rsi_data.DnsGet);	
-			BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_DNS_get,TIME_OUT_WIFI_CONNECT);
+			BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_DNS_get,TIME_OUT_WIFI_CONNECT_MS);
 			/*Transform from hex to string*/
 			sprintf(rf.MQTT.DNS_IP_String, "%d.%d.%d.%d", rf.MQTT.DNS_IP_hex[0], rf.MQTT.DNS_IP_hex[1], rf.MQTT.DNS_IP_hex[2], rf.MQTT.DNS_IP_hex[3]);
 			DNS_IP_try++;
@@ -548,19 +545,19 @@ bool BSP_RF_RS9116_MQTT_Connect(void)
 		strcat(rf.m_tx_buf, MQTT_Server_Port);
 		strcat(rf.m_tx_buf, ",");
     BSP_RF_Get_String_Length(Device_ID);
-		strcat(rf.m_tx_buf, rf.data_length);
+		strcat(rf.m_tx_buf, rf.string_data_length);
 		strcat(rf.m_tx_buf, ",");
 		strcat(rf.m_tx_buf, Device_ID);
 		strcat(rf.m_tx_buf, ",");
 		strcat(rf.m_tx_buf, MQTT_keep_alive_interval);
 		strcat(rf.m_tx_buf, ",");
     BSP_RF_Get_String_Length(MQTT_username);
-		strcat(rf.m_tx_buf, rf.data_length);
+		strcat(rf.m_tx_buf, rf.string_data_length);
 		strcat(rf.m_tx_buf, ",");
 		strcat(rf.m_tx_buf, MQTT_username);
 		strcat(rf.m_tx_buf, ",");
     BSP_RF_Get_String_Length(MQTT_password);
-		strcat(rf.m_tx_buf, rf.data_length);
+		strcat(rf.m_tx_buf, rf.string_data_length);
 		strcat(rf.m_tx_buf, ",");
 		strcat(rf.m_tx_buf, MQTT_password);
 		strcat(rf.m_tx_buf, ",");
@@ -569,23 +566,23 @@ bool BSP_RF_RS9116_MQTT_Connect(void)
 		strcat(rf.m_tx_buf, MQTT_En_keep_alive_interval);
 		strcat(rf.m_tx_buf, ",");
 		strcat(rf.m_tx_buf, MQTT_client_port);
-		BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_MQTT_Init,TIME_OUT_MQTT);
+		BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_MQTT_Init,TIME_OUT_MQTT_MS);
 
 		/*MQTT_MQTT_Con */
 		memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
 		strcat(rf.m_tx_buf, rsi_cmd.MQTT);
 		strcat(rf.m_tx_buf, rsi_data.MQTT_Con);
-		BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_MQTT_Con,TIME_OUT_MQTT);
+		BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_MQTT_Con,TIME_OUT_MQTT_MS);
 
-	if(rf.rs_state==S_MQTT_Con)
-	{
-			return true;
-	}
-	else
-	{
-		 return false;
+		if(rf.rs_state==S_MQTT_Con)
+		{
+				return true;
+		}
+		else
+		{
+			 return false;
 
-	}
+		}
 }
 /**
   *@brief  DisConnect to AWS MQTT broker
@@ -600,7 +597,7 @@ bool BSP_RF_RS9116_MQTT_DisConnect(void)
 	memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
 	strcat(rf.m_tx_buf, rsi_cmd.MQTT);
 	strcat(rf.m_tx_buf, rsi_data.MQTT_disCon);
-	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_is_WIFI_Connected,TIME_OUT_MQTT);
+	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_is_WIFI_Connected,TIME_OUT_MQTT_MS);
 	if(rf.rs_state==S_is_WIFI_Connected)
 	{
 			return true;
@@ -625,15 +622,15 @@ bool BSP_RF_RS9116_MQTT_Publish(char * Topic,char * data)
 	strcat(rf.m_tx_buf, rsi_cmd.MQTT);
 	strcat(rf.m_tx_buf, rsi_data.MQTT_Pub);
 	BSP_RF_Get_String_Length(Topic);
-	strcat(rf.m_tx_buf, rf.data_length);
+	strcat(rf.m_tx_buf, rf.string_data_length);
 	strcat(rf.m_tx_buf, ",");	
 	strcat(rf.m_tx_buf, Topic);	
 	strcat(rf.m_tx_buf, ",1,0,");	
 	BSP_RF_Get_String_Length(data);
-	strcat(rf.m_tx_buf, rf.data_length);
+	strcat(rf.m_tx_buf, rf.string_data_length);
 	strcat(rf.m_tx_buf, ",");	
 	strcat(rf.m_tx_buf, data);
-	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_MQTT_Con,TIME_OUT_MQTT);
+	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_MQTT_Con,TIME_OUT_MQTT_MS);
 	if(rf.rs_state==S_is_WIFI_Connected)
 	{
 			return true;

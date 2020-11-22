@@ -132,20 +132,7 @@ void BSP_UART_ReceiveDMA(uint8_t *byte_array, uint8_t size)
 	HAL_UART_Receive_DMA(&huart, byte_array, size);
 }
 
-///**
-//  * @brief	BSP uart receive function, DMA mode and UART Idel interrupt
-//	* @param	byte_array, data to be transmit
-//     buffer length reference  DMA_RECEIVE_IDEL_IT_BUFFER_SIZE
-//  */
-//void BSP_UART_Receive_Mode_DMA_IDEL_IT(uint8_t *byte_array)
-//{
-//	 m_is_rx_done = false;
-//	__HAL_UART_ENABLE_IT(&huart,UART_IT_IDLE);
-//	__HAL_UART_CLEAR_FLAG(&huart,UART_CLEAR_OREF);//Clear  if overrun data
-//	HAL_Delay(10);
-//  /**@TBD*/
-//	HAL_UART_Receive_DMA(&huart, byte_array, DMA_RECEIVE_IDEL_IT_BUFFER_SIZE);
-//}
+
 
 /**
   * @brief	BSP Stop DMA mode
@@ -217,24 +204,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
 	
 	}
 }
-///**
-//  * @brief  This Funciton is use to Get data form elasticity length
-//  * @param  None
-//  * @note   
-//  * @retval None
-//  */
-//void DMA_IDEL_IT_Get_data(void)
-//{
 
-//   		m_is_rx_done = true;
-//			static uint16_t temp=0;	
-//       uint16_t BUFFER_SIZE=huart.RxXferSize;	//get RX buffer size
-
-//			temp  = hdma_usart2_rx.Instance->CNDTR;// Get how many data didn't get
-//			
-//	    DMA_RX_length =  BUFFER_SIZE - temp; //Get how many data get
-//			BSP_UART_RX_DMA_Handler(DMA_RX_length);
-//}
 /**
   * @brief  UART error callbacks
   * @param  UartHandle: UART handle

@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * @file    bsp_rf.h 
-  * @author  YZTek Software TEAM
+  * @author  YZTek Wilson
   * @brief   Header for bsp_rf.h module
   ******************************************************************************
   * @attention
@@ -73,21 +73,6 @@ typedef struct
 	  char * MQTT_disCon;
 	  char * MQTT_delete;
 }RSI_AT_COMMAND_PARAMETER_t;
-
-
-typedef enum
-{
-	 DONE=  0x00,
-	 BUSY,
-
-}DMA_Status_t;
-typedef enum
-{
-	 None= 0x00,
-	 OK,
-	 Error,
-
-}AT_respond_t;
 /**@RSI status */
 
 typedef enum
@@ -132,12 +117,12 @@ typedef struct
 typedef struct
 {	
 	RS9116_State_t rs_state;
-	MQTT_t MQTT;
 	RS9116_ERROR_t error_code;
-	AT_respond_t AT_respond;
 	char   m_tx_buf[TX_BUFFER_SIZE] ;
 	char   m_rx_buf[RX_BUFFER_SIZE] ;
-	char   data_length[3];
+	char   string_data_length[3];
+	MQTT_t MQTT;
+	
 }RF_Ctrl_t;
 
 /* Exported constants --------------------------------------------------------*/

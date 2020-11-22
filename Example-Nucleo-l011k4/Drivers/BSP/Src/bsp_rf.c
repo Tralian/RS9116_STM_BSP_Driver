@@ -104,7 +104,7 @@ static RSI_AT_COMMAND_PARAMETER_t rsi_data=
 
 
 
-static RF_Ctrl_t rf={.MQTT.Publish_Topic="",.MQTT.Subcribe_Topic=""};
+static RF_Ctrl_t rf;
 /*For RS9116 AT Command*/
 /************************ Private functions Prototype************************/
 bool BSP_RF_Decode_DNS(void);
@@ -375,6 +375,14 @@ void BSP_RF_Get_String_Length(const char * Buffer)
 	  length=strlen(Buffer);
 		sprintf(rf.string_data_length,"%d",length);
 }
+/**
+  *@brief  Receive  data form MQTT broker
+  *@param  Buffer :  buffer 
+  *@retval string : Length (ASCII form) 
+  *@author YZTEK Wilson
+  *
+  */
+
 /************************ Exported function implementation************************/
 
 /**
@@ -666,6 +674,33 @@ void BSP_RF_RS9116_JSON_Encode(char * JSON ,char * Object1,char * value1,char * 
 	strcat(JSON, value2);  
 	strcat(JSON, "\"}");  
 }
+
+/**
+  *@brief  Subscribe form AWS MQTT broker
+  *@param  Subscribe Topic
+	*@retval True if successful Connect
+  *@author YZTEK Wilson
+  *
+  */
+
+bool BSP_RF_RS9116_MQTT_Subscribe(char * Topic)
+{
+//	memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
+//	strcat(rf.m_tx_buf, rsi_cmd.MQTT);
+//	strcat(rf.m_tx_buf, rsi_data.MQTT_Pub);
+//	BSP_RF_Get_String_Length(Topic);
+//	strcat(rf.m_tx_buf, rf.string_data_length);
+//	strcat(rf.m_tx_buf, ",");	
+//	strcat(rf.m_tx_buf, Topic);	
+//	strcat(rf.m_tx_buf, ",1,0,0,");	
+//	BSP_RF_Get_String_Length(data);
+//	strcat(rf.m_tx_buf, rf.string_data_length);
+//	strcat(rf.m_tx_buf, ",");	
+//	strcat(rf.m_tx_buf, data);
+//	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_MQTT_Con,TIME_OUT_MQTT_MS);
+
+}
+
 
 /**
   *@brief  BSP for Setting RF module Status

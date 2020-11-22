@@ -112,8 +112,6 @@ typedef struct
   uint8_t DNS_IP_hex[4];
 	char    DNS_IP_String[15];
 	uint8_t Num_SubScribe_Topic;
-	char * Publish_Topic;
-	char * Subcribe_Topic;
 }MQTT_t;
 
 typedef struct

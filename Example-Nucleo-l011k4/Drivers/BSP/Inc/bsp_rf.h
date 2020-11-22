@@ -29,6 +29,7 @@
 
 #define TX_BUFFER_SIZE		100
 #define RX_BUFFER_SIZE	  170
+#define MQTT_CMD_BUFFER_SIZE 10
 /* Exported types ------------------------------------------------------------*/
 /**@AT Command Struct*/
 typedef struct 
@@ -51,6 +52,8 @@ typedef struct
 		char * IPconfig;
 		char * DnsGet;
 		char * MQTT;
+		char * MQTT_DISCONNECT;
+		char * MQTT_READ;
 		
 }RSI_AT_COMMAND_t;
 /**@AT Command Parameter*/
@@ -105,13 +108,26 @@ typedef enum
 	DNS_IP_lost,
 	
 }RS9116_ERROR_t;
+/**@CMD  User can add CMD here*/
+typedef enum
+{
+	CMD_EMPTY=0X00,
+	CMD_MQTT_On,
+	CMD_MQTT_Off,
+	
+}MQTT_CMD_t;
 /**@MQTT infor */
 
 typedef struct
 {
-  uint8_t DNS_IP_hex[4];
-	char    DNS_IP_String[15];
-	uint8_t Num_SubScribe_Topic;
+  uint8_t    DNS_IP_hex[4];
+	char       DNS_IP_String[15];
+	bool       Subscribing;
+	bool    	 Publishing;
+	uint8_t    Get_CMD; //!!!!!!!!!!!!!!!!!!!
+  MQTT_CMD_t CMD_Buffer[MQTT_CMD_BUFFER_SIZE]; 
+	uint8_t    read_index;
+  
 }MQTT_t;
 
 typedef struct
@@ -133,9 +149,15 @@ bool BSP_RF_RS9116_Init(void);
 bool BSP_RF_RS9116_WIFI_Connect(void);
 bool BSP_RF_RS9116_MQTT_Connect(void);
 bool BSP_RF_RS9116_MQTT_DisConnect(void);
-bool BSP_RF_RS9116_MQTT_Subcribe(char * Topic);
-bool BSP_RF_RS9116_MQTT_UnSubcribe(char * Topic);
+
 bool BSP_RF_RS9116_MQTT_Publish(char * Topic,char * data);
+
+bool BSP_RF_RS9116_MQTT_Subscribe(char * Topic);
+MQTT_CMD_t BSP_RF_MQTT_CMD_Pop(void);
+
+bool BSP_RF_RS9116_MQTT_UnSubscribe(char * Topic);
+
+
 void BSP_RF_RS9116_JSON_Encode(char * JSON ,char * Object1,char * value1,char * Object2,char * value2);
 
 

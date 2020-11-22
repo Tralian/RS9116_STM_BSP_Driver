@@ -40,10 +40,10 @@ typedef enum
 
 
 /**@For User Config ***********************************************************/
-const char * SSID="myLoad";
-const char * SSID_password="0912345678";
-//const char * SSID="Wei";
-//const char * SSID_password="50882056";
+//const char * SSID="myLoad";
+//const char * SSID_password="0912345678";
+const char * SSID="Wei";
+const char * SSID_password="50882056";
 const char * AWS_endpoint="av9pn5o54ct6w-ats.iot.ap-northeast-1.amazonaws.com";
 
 
@@ -57,8 +57,11 @@ const char * MQTT_client_port="5503";
 const char * MQTT_keep_alive_interval="80";
 const char * MQTT_En_clean_session="1";
 const char * MQTT_En_keep_alive_interval="1";
+
+
+const char * MQTT_Sub_Topic="yztek/ty002/d/NECCUIUaAZDC";
+const char * MQTT_Pub_Topic="yztek/ty002/s";
 /*******************************************************************************/
-const char * MQTT_DISCONNECT="mqtt=8";
 
 const RSI_AT_COMMAND_t rsi_cmd=
 {
@@ -80,6 +83,8 @@ const RSI_AT_COMMAND_t rsi_cmd=
 	.IPconfig="ipconf=",
 	.DnsGet="dnsget=",
 	.MQTT="mqtt=",
+	.MQTT_DISCONNECT="mqtt=8",
+	.MQTT_READ="AT+RSI_MQTT_READ_DATA",
 };
 
 static RSI_AT_COMMAND_PARAMETER_t rsi_data=
@@ -107,9 +112,17 @@ static RSI_AT_COMMAND_PARAMETER_t rsi_data=
 static RF_Ctrl_t rf;
 /*For RS9116 AT Command*/
 /************************ Private functions Prototype************************/
-bool BSP_RF_Decode_DNS(void);
-DMA_Status_t BSP_RF_Get_DMA_RX_Status(void);
+void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void);
+bool BSP_RF_Start_dma_receive(void);
+void BSP_RF_AT_Command_Send(const char * command);
+void BSP_RF_AT_Command_Communication(const char * command,RS9116_State_t Next_State ,uint32_t timeout);
+void BSP_RF_AT_Send_FS(void);
+void BSP_RF_AT_Send_Char(char ch);
 void BSP_RF_Clear_buffer(uint8_t *buffer,uint16_t length);
+DMA_Status_t BSP_RF_Get_DMA_RX_Status(void);
+bool BSP_RF_Decode_DNS(void);
+void BSP_RF_Get_String_Length(const char * Buffer);
+void BSP_RF_RS9116_JSON_Decode(void);
 
 /************************ Private functions implementation************************/
 
@@ -123,17 +136,36 @@ void BSP_RF_Clear_buffer(uint8_t *buffer,uint16_t length);
   */
 void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
 {
+	/**@TBD !!!!!!!!!need imporve effective here !!!!!!!!!!!!!!!!*/
 	/*Find RX buffer keyword*/
 	for(uint8_t i=0;i<strlen(rf.m_rx_buf);i++)
 	{
+		/*Get OK CMD form RF module*/
 		if(*(rf.m_rx_buf+i)=='O'&&*(rf.m_rx_buf+i+1)=='K')
 		{
-	  	rf.error_code=None_error;		
+	  	rf.error_code=None_error;	
+			/*check Publishing/Publishing is done or not*/
+			if(rf.MQTT.Publishing==true)
+			{
+				rf.MQTT.Publishing=false;
+			}
+			else if(rf.MQTT.Subscribing==true)
+			{
+				rf.MQTT.Subscribing=false;
+			}
 			break;
 		}
+		/*Get Error CMD form RF module*/
 		else if(memcmp((void *)(rf.m_rx_buf+i),(void *)rsi_cmd.Error,5)==0)
 		{
 	  	rf.error_code=AT_Respond_Error;		
+			break;
+		}
+		/*Get data form RF module*/
+  	else if(memcmp((void *)(rf.m_rx_buf+i),(void *)rsi_cmd.MQTT_READ,21)==0)
+		{
+			rf.error_code=None_error;	
+		  rf.MQTT.Get_CMD=1;
 			break;
 		}
 			
@@ -175,6 +207,7 @@ void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
 							{
 								BSP_RF_set_status(S_DNS_get);
 							}
+															
 					break;
 				case S_DNS_get:
 							
@@ -184,10 +217,19 @@ void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
 							BSP_RF_set_status(S_MQTT_Con);
 					break;	
 				case S_MQTT_Con:
-					    if(memcmp((void *)(rf.m_tx_buf),(void *)MQTT_DISCONNECT,6)==0)
+					    if(memcmp((void *)(rf.m_tx_buf),(void *)rsi_cmd.MQTT_DISCONNECT,6)==0)
 							{
 								BSP_RF_set_status(S_is_WIFI_Connected);
 							}
+							if(rf.MQTT.Get_CMD==1)
+							{
+								rf.MQTT.Get_CMD=2;
+							}
+							else if(rf.MQTT.Get_CMD==2)
+							{
+								 BSP_RF_RS9116_JSON_Decode();
+
+							}	
 					break;
 
 		
@@ -347,7 +389,7 @@ bool BSP_RF_Decode_DNS(void)
 			}
 		}
 	}
-	/*Check DNS exsit*/
+	/*Check DNS is exsit*/
 	if(  memcmp((void *)(rf.MQTT.DNS_IP_hex),(void *)check,4)==0  )
 	{
 		return false;
@@ -376,13 +418,28 @@ void BSP_RF_Get_String_Length(const char * Buffer)
 		sprintf(rf.string_data_length,"%d",length);
 }
 /**
-  *@brief  Receive  data form MQTT broker
-  *@param  Buffer :  buffer 
-  *@retval string : Length (ASCII form) 
+  *@brief  Decode  m_rx_buf form MQTT broker
+  *@retval none
   *@author YZTEK Wilson
   *
   */
+void BSP_RF_RS9116_JSON_Decode(void)
+{
 
+	for(uint8_t i=0;i<strlen(rf.m_rx_buf);i++)
+	{
+	
+		/*Get data form RF module*/
+  	if(memcmp((void *)(rf.m_rx_buf+i),(void *)MQTT_Sub_Topic,strlen(MQTT_Sub_Topic))==0)
+		{
+
+			break;
+		}
+			
+	
+	}
+
+}
 /************************ Exported function implementation************************/
 
 /**
@@ -619,13 +676,13 @@ bool BSP_RF_RS9116_MQTT_DisConnect(void)
 /**
   *@brief  Publish to AWS MQTT broker
   *@param  None
-	*@retval True if successful Connect
+	*@retval True if successful Publish
   *@author YZTEK Wilson
   *
   */
 bool BSP_RF_RS9116_MQTT_Publish(char * Topic,char * data)
 {
-
+  rf.MQTT.Publishing=true;
 	memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
 	strcat(rf.m_tx_buf, rsi_cmd.MQTT);
 	strcat(rf.m_tx_buf, rsi_data.MQTT_Pub);
@@ -639,7 +696,8 @@ bool BSP_RF_RS9116_MQTT_Publish(char * Topic,char * data)
 	strcat(rf.m_tx_buf, ",");	
 	strcat(rf.m_tx_buf, data);
 	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_MQTT_Con,TIME_OUT_MQTT_MS);
-	if(rf.rs_state==S_is_WIFI_Connected)
+	/*Need implement delay if wantna check repond */
+	if(rf.MQTT.Publishing==false)
 	{
 			return true;
 	}
@@ -685,22 +743,54 @@ void BSP_RF_RS9116_JSON_Encode(char * JSON ,char * Object1,char * value1,char * 
 
 bool BSP_RF_RS9116_MQTT_Subscribe(char * Topic)
 {
-//	memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
-//	strcat(rf.m_tx_buf, rsi_cmd.MQTT);
-//	strcat(rf.m_tx_buf, rsi_data.MQTT_Pub);
-//	BSP_RF_Get_String_Length(Topic);
-//	strcat(rf.m_tx_buf, rf.string_data_length);
-//	strcat(rf.m_tx_buf, ",");	
-//	strcat(rf.m_tx_buf, Topic);	
-//	strcat(rf.m_tx_buf, ",1,0,0,");	
-//	BSP_RF_Get_String_Length(data);
-//	strcat(rf.m_tx_buf, rf.string_data_length);
-//	strcat(rf.m_tx_buf, ",");	
-//	strcat(rf.m_tx_buf, data);
-//	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_MQTT_Con,TIME_OUT_MQTT_MS);
+	  rf.MQTT.Subscribing=true;
 
+		memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
+		strcat(rf.m_tx_buf, rsi_cmd.MQTT);
+		strcat(rf.m_tx_buf, rsi_data.MQTT_Sub);
+		BSP_RF_Get_String_Length(Topic);
+		strcat(rf.m_tx_buf, rf.string_data_length);
+		strcat(rf.m_tx_buf, ",");	
+		strcat(rf.m_tx_buf, Topic);	
+		strcat(rf.m_tx_buf, ",1");	
+		BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_MQTT_Con,TIME_OUT_MQTT_MS);
+    if(rf.MQTT.Subscribing==false)
+		{
+			return true;
+		}
+		else
+		{
+			 return false;
+		}
 }
 
+
+/**
+  * @brief  Get command form RF module
+  * @retval If return Ture will get data form cmd tabel
+  * @retval If return False mean no data or no this command  ask
+  * @author YZTEK Wilson
+  */
+MQTT_CMD_t BSP_RF_MQTT_CMD_Pop(void)
+{
+	  MQTT_CMD_t  temp = rf.MQTT.CMD_Buffer[rf.MQTT.read_index];
+	
+		if(temp != CMD_EMPTY)
+		{
+			// clear cmd
+			rf.MQTT.CMD_Buffer[rf.MQTT.read_index] = CMD_EMPTY;
+
+			// point to next read index
+			rf.MQTT.read_index++;
+
+			// overflow check
+			if(rf.MQTT.read_index>=MQTT_CMD_BUFFER_SIZE)
+			{			
+				rf.MQTT.read_index=0;;
+			}
+		}
+		return temp;
+}
 
 /**
   *@brief  BSP for Setting RF module Status
@@ -709,7 +799,6 @@ bool BSP_RF_RS9116_MQTT_Subscribe(char * Topic)
   *@author YZTEK Wilson
   *
   */
-
 void BSP_RF_set_status(RS9116_State_t stage)
 {
 

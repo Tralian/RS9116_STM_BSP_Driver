@@ -35,10 +35,10 @@
 
 /*Need add Topic ,Can Export here*/
 
-const char * MQTT_Sub_Topic="yztek/ty002/d/NECCUIUaAZDC";
-const char * MQTT_Pub_Topic="yztek/ty002/s";
 
 
+extern  char * MQTT_Sub_Topic;
+extern  char * MQTT_Pub_Topic;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void MX_GPIO_Init(void);
@@ -56,7 +56,7 @@ int main(void)
 	BSP_RF_RS9116_MQTT_Connect();
 	HAL_Delay(5000);
 	/*MQTT Subscribe */
-	//BSP_RF_RS9116_MQTT_Subcribe((char *)MQTT_Sub_Topic);
+	BSP_RF_RS9116_MQTT_Subscribe((char *)MQTT_Sub_Topic);
 	
 	/*MQTT Publish */
   static char mqtt_pub_data[100];
@@ -70,7 +70,11 @@ int main(void)
 
   while (1)
 	{
-
+			if(BSP_RF_MQTT_CMD_Pop()==CMD_MQTT_On)
+			{
+					printf("Get MQTT On\r");
+			
+			}
   }
 }
 /** Configure pins as

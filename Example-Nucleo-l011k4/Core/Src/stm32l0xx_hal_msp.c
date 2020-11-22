@@ -140,7 +140,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
 		HAL_NVIC_SetPriority(UARTx_IRQn, UARTx_IRQ_PRI, 0);
 		HAL_NVIC_EnableIRQ(UARTx_IRQn);
 		/*UART Character Match Interrupt*/
-		USART2->CR2 |= 0x0A000000; // \r 0x0A
+		USART2->CR2 |= 0x0A000000; //  \n 0x0A
     __HAL_UART_ENABLE_IT(uartHandle,UART_IT_CM);
 		
   }

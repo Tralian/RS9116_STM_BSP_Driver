@@ -112,6 +112,8 @@ typedef struct
   uint8_t DNS_IP_hex[4];
 	char    DNS_IP_String[15];
 	uint8_t Num_SubScribe_Topic;
+	char * Publish_Topic;
+	char * Subcribe_Topic;
 }MQTT_t;
 
 typedef struct
@@ -136,6 +138,7 @@ bool BSP_RF_RS9116_MQTT_DisConnect(void);
 bool BSP_RF_RS9116_MQTT_Subcribe(char * Topic);
 bool BSP_RF_RS9116_MQTT_UnSubcribe(char * Topic);
 bool BSP_RF_RS9116_MQTT_Publish(char * Topic,char * data);
+void BSP_RF_RS9116_JSON_Encode(char * JSON ,char * Object1,char * value1,char * Object2,char * value2);
 
 
 void BSP_RF_set_status(RS9116_State_t stage);

@@ -104,7 +104,7 @@ static RSI_AT_COMMAND_PARAMETER_t rsi_data=
 
 
 
-static RF_Ctrl_t rf;
+static RF_Ctrl_t rf={.MQTT.Publish_Topic="",.MQTT.Subcribe_Topic=""};
 /*For RS9116 AT Command*/
 /************************ Private functions Prototype************************/
 bool BSP_RF_Decode_DNS(void);
@@ -625,7 +625,7 @@ bool BSP_RF_RS9116_MQTT_Publish(char * Topic,char * data)
 	strcat(rf.m_tx_buf, rf.string_data_length);
 	strcat(rf.m_tx_buf, ",");	
 	strcat(rf.m_tx_buf, Topic);	
-	strcat(rf.m_tx_buf, ",1,0,");	
+	strcat(rf.m_tx_buf, ",1,0,0,");	
 	BSP_RF_Get_String_Length(data);
 	strcat(rf.m_tx_buf, rf.string_data_length);
 	strcat(rf.m_tx_buf, ",");	
@@ -641,6 +641,32 @@ bool BSP_RF_RS9116_MQTT_Publish(char * Topic,char * data)
 
 	}
 }
+/**
+  *@brief  Transform data  to JSON format
+  *@param  JSON    :buffer storage  JSON format data
+  *@param  Object  :name of Object1
+	*@param  value 	 :value of data1
+  *@param  Object  :name of Object2
+	*@param  value 	 :value of data2
+	*@retval True if successful Connect
+  *@author YZTEK Wilson
+  *
+  */
+void BSP_RF_RS9116_JSON_Encode(char * JSON ,char * Object1,char * value1,char * Object2,char * value2)
+{
+  
+	memset(JSON, '\0', strlen(JSON));	
+	strcat(JSON, "{\"");
+	strcat(JSON, Object1);
+	strcat(JSON, "\":\"");  
+	strcat(JSON, value1);  
+	strcat(JSON, "\",\"");  
+	strcat(JSON, Object2);
+	strcat(JSON, "\":\"");  
+	strcat(JSON, value2);  
+	strcat(JSON, "\"}");  
+}
+
 /**
   *@brief  BSP for Setting RF module Status
   *@param  RS9116_State_t

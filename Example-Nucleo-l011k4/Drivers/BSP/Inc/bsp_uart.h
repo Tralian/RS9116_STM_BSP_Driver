@@ -91,6 +91,8 @@ void BSP_UART_ReceiveDMA(uint8_t *byte_array, uint8_t size);
 bool BSP_UART_ReceiveBlocking(uint8_t *byte_array, uint8_t size, uint16_t timeout_ms);
 void BSP_UART_StopDMA(void);
 
+void BSP_UART_DMA_Character_Match_IT_Mode(void);
+void BSP_UART_DMA_IDEL_IT_Mode(void);
 
 bool DMA_RX_Status(void);
 

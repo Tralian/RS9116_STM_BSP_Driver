@@ -38,7 +38,8 @@ DMA_HandleTypeDef hdma_usart2_tx;
 static __IO bool m_is_tx_done;
 static __IO bool m_is_rx_done;
 	
-	
+static uint16_t DMA_IDEL_IT_RX_length=0;
+
 //static uint16_t DMA_RX_length=0;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -80,8 +81,6 @@ void BSP_UART_Init(void)
 	{
 	 while(1);
 	}		
-	
-
 
 }
 
@@ -94,7 +93,8 @@ void BSP_UART_DeInit(void)
 	{
 		HAL_UART_DeInit(&huart);
 	}
-
+    /* USART2 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(USART2_IRQn);
 }
 
 /**
@@ -117,6 +117,30 @@ void BSP_UART_TransmitBlocking(uint8_t *byte_array, uint8_t size, uint16_t timeo
 {
 	m_is_tx_done = false;
 	HAL_UART_Transmit(&huart, byte_array, size, timeout_ms);
+}
+/**
+  *@brief  Enable  DMA Charracter Match IT and Disable DMA Idel IT
+	*@retval None
+  *@author YZTEK Wilson
+  *
+  */
+void BSP_UART_DMA_Character_Match_IT_Mode(void)
+{
+	__HAL_UART_ENABLE_IT(&huart,UART_IT_CM);
+	__HAL_UART_DISABLE_IT(&huart,UART_IT_IDLE);
+	__HAL_UART_CLEAR_FLAG(&huart,UART_CLEAR_OREF);//Clear  if overrun data
+}
+/**
+  *@brief  Disable  DMA Charracter Match IT and Enable DMA Idel IT
+	*@retval None
+  *@author YZTEK Wilson
+  *
+  */
+void BSP_UART_DMA_IDEL_IT_Mode(void)
+{
+	__HAL_UART_ENABLE_IT(&huart,UART_IT_IDLE);
+	__HAL_UART_DISABLE_IT(&huart,UART_IT_CM);
+	__HAL_UART_CLEAR_FLAG(&huart,UART_CLEAR_OREF);//Clear  if overrun data
 }
 
 /**
@@ -141,8 +165,8 @@ void BSP_UART_ReceiveDMA(uint8_t *byte_array, uint8_t size)
   */
 void BSP_UART_StopDMA(void)
 {
-	m_is_rx_done = false;
 	HAL_UART_DMAStop(&huart);
+	m_is_rx_done = true;
 
 }
 /**
@@ -230,7 +254,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
 }
 
 /* Weakly defined function to be implemented externally --------------------------*/
-__weak void BSP_UART_RX_DMA_Handler(uint16_t data_len)
+__weak void BSP_UART_RX_DMA_IDEL_IT_Handler(uint16_t data_len)
 {	/* add your parsing routine here */
 	
 	/* check packet validity*/
@@ -242,7 +266,28 @@ __weak void BSP_UART_RX_DMA_Handler(uint16_t data_len)
 	
 }
 
+/**
+  * @brief  This Funciton is use to Get data form elasticity length
+  * @param  None
+  * @note   
+  * @retval None
+  */
 
+void DMA_IDEL_IT_Get_data(void)
+{
+//	uint32_t temp;
+
+   
+			uint16_t temp=0;	
+      uint16_t BUFFER_SIZE=huart.RxXferSize;	//get RX buffer size
+		  //printf("huart.RxXferSize %d\n",BUFFER_SIZE);
+
+			temp  = hdma_usart2_rx.Instance->CNDTR;// Get how many data didn't get
+		  //printf("rx.Instance->CNDTR %d\n",temp);
+
+	    DMA_IDEL_IT_RX_length =  BUFFER_SIZE - temp; //Get how many data get
+			BSP_UART_RX_DMA_IDEL_IT_Handler(DMA_IDEL_IT_RX_length);
+}
 
 
 #endif	/* USE_UART */

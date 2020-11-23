@@ -116,6 +116,7 @@ typedef enum
 	CMD_MQTT_Off,
 	
 }MQTT_CMD_t;
+
 /**@MQTT infor */
 
 typedef struct
@@ -124,11 +125,17 @@ typedef struct
 	char       DNS_IP_String[15];
 	bool       Subscribing;
 	bool    	 Publishing;
-	uint8_t    Get_CMD; //!!!!!!!!!!!!!!!!!!!
   MQTT_CMD_t CMD_Buffer[MQTT_CMD_BUFFER_SIZE]; 
 	uint8_t    read_index;
   
 }MQTT_t;
+/**@MQTT infor */
+typedef enum
+{
+ DMA_Character_Match_Mode=0x00,
+ DMA_IDEL_IT_Mode,
+
+}DMA_MODE_T;
 
 typedef struct
 {	
@@ -138,7 +145,7 @@ typedef struct
 	char   m_rx_buf[RX_BUFFER_SIZE] ;
 	char   string_data_length[3];
 	MQTT_t MQTT;
-	
+	DMA_MODE_T dma_mode;
 }RF_Ctrl_t;
 
 /* Exported constants --------------------------------------------------------*/
@@ -163,6 +170,7 @@ void BSP_RF_RS9116_JSON_Encode(char * JSON ,char * Object1,char * value1,char * 
 
 void BSP_RF_set_status(RS9116_State_t stage);
 RS9116_State_t BSP_RF_get_module_status(void);
+DMA_MODE_T BSP_RF_Get_DMA_mode(void);
 
 
 /* Linker functions ------------------------------------------------------- */

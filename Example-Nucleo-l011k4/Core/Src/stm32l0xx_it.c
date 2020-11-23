@@ -33,9 +33,10 @@
 /* Private user code ---------------------------------------------------------*/
 /* External variables --------------------------------------------------------*/
 extern UART_HandleTypeDef huart;
-
 extern DMA_HandleTypeDef hdma_usart2_rx;
 extern void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void);
+extern void DMA_IDEL_IT_Get_data(void);
+
 /******************************************************************************/
 /*           Cortex-M0+ Processor Interruption and Exception Handlers          */
 /******************************************************************************/
@@ -103,13 +104,32 @@ void DMA1_Channel2_3_IRQHandler(void)
   */
 void USART2_IRQHandler(void)
 {
-	/*Character match interrupt*/
-	if(__HAL_UART_GET_IT(&huart, UART_IT_CM))
+	/**@TBD Temp solutiob */
+	if(BSP_RF_Get_DMA_mode()==DMA_Character_Match_Mode)
 	{
-	  BSP_UART_StopDMA();/*Stop DMA*/
-		BSP_UART_RX_DMA_Character_Martch_IT_Handler();
-    __HAL_UART_CLEAR_FLAG(&huart, UART_CLEAR_CMF);
-  }
+		/*Character match interrupt*/
+			if(__HAL_UART_GET_IT(&huart, UART_IT_CM))
+			{
+				BSP_UART_StopDMA();/*Stop DMA*/
+				BSP_UART_RX_DMA_Character_Martch_IT_Handler();
+
+			}		
+		
+	}	
+	if(BSP_RF_Get_DMA_mode()==DMA_IDEL_IT_Mode)
+	{
+		/*Idle interrupt*/
+		if(__HAL_UART_GET_FLAG(&huart,UART_FLAG_IDLE)== SET)
+		{ 
+				/*Stop DMA*/
+				HAL_UART_DMAStop(&huart);
+				DMA_IDEL_IT_Get_data();	
+
+		}	 
+	}  
+	__HAL_UART_CLEAR_FLAG(&huart, UART_CLEAR_CMF);
+	__HAL_UART_CLEAR_FLAG(&huart, UART_CLEAR_IDLEF);
+	__HAL_UART_CLEAR_FLAG(&huart,UART_CLEAR_OREF);//Clear Flag
 
   HAL_UART_IRQHandler(&huart);
 

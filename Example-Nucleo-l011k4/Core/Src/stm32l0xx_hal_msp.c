@@ -128,21 +128,19 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     }
 
     __HAL_LINKDMA(uartHandle,hdmatx,hdma_usart2_tx);
-			/* NVIC configuration for DMA transfer complete interrupt (USART2_TX) */
-//		HAL_NVIC_SetPriority(UARTx_DMA_TX_IRQn, UARTx_DMA_IRQ_PRI, 0);
-//		HAL_NVIC_EnableIRQ(UARTx_DMA_TX_IRQn);
-    
+		
+			USART2->CR2 |= 0x0A000000; //  \n 0x0A
+	  __HAL_UART_ENABLE_IT(&huart,UART_IT_CM);
+		
 		/* NVIC configuration for DMA transfer complete interrupt (USART2_RX) */
 		HAL_NVIC_SetPriority(UARTx_DMA_RX_IRQn, UARTx_DMA_IRQ_PRI, 0);
 		HAL_NVIC_EnableIRQ(UARTx_DMA_RX_IRQn);
-  
+
 		/* NVIC for USART, to catch the TX complete */
 		HAL_NVIC_SetPriority(UARTx_IRQn, UARTx_IRQ_PRI, 0);
 		HAL_NVIC_EnableIRQ(UARTx_IRQn);
-		/*UART Character Match Interrupt*/
-		USART2->CR2 |= 0x0A000000; //  \n 0x0A
-    __HAL_UART_ENABLE_IT(uartHandle,UART_IT_CM);
-		
+    
+
   }
 }
 
@@ -168,11 +166,8 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
     HAL_DMA_DeInit(uartHandle->hdmarx);
     HAL_DMA_DeInit(uartHandle->hdmatx);
 
-    /* USART2 interrupt Deinit */
-    HAL_NVIC_DisableIRQ(USART2_IRQn);
-  /* USER CODE BEGIN USART2_MspDeInit 1 */
 
-  /* USER CODE END USART2_MspDeInit 1 */
+
   }
 }
 

@@ -40,10 +40,10 @@ typedef enum
 
 
 /**@For User Config ***********************************************************/
-//const char * SSID="myLoad";
-//const char * SSID_password="0912345678";
-const char * SSID="Wei";
-const char * SSID_password="50882056";
+const char * SSID="myLoad";
+const char * SSID_password="0912345678";
+//const char * SSID="Wei";
+//const char * SSID_password="50882056";
 const char * AWS_endpoint="av9pn5o54ct6w-ats.iot.ap-northeast-1.amazonaws.com";
 
 
@@ -128,8 +128,8 @@ void BSP_RF_RS9116_JSON_Decode(void);
 
 
 /**
-  *@brief  UART RX DMA Complie Handler
-  *@param  RF_Ctrl_t: me pointer
+  *@brief  UART RX DMA Character match Handler
+  *@param  None
 	*@retval None
   *@author YZTEK Wilson
   *
@@ -160,16 +160,7 @@ void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
 		{
 	  	rf.error_code=AT_Respond_Error;		
 			break;
-		}
-		/*Get data form RF module*/
-  	else if(memcmp((void *)(rf.m_rx_buf+i),(void *)rsi_cmd.MQTT_READ,21)==0)
-		{
-			rf.error_code=None_error;	
-		  rf.MQTT.Get_CMD=1;
-			break;
-		}
-			
-	
+		}	
 	}
 	if(	 rf.error_code==None_error)
 	{
@@ -221,15 +212,12 @@ void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
 							{
 								BSP_RF_set_status(S_is_WIFI_Connected);
 							}
-							if(rf.MQTT.Get_CMD==1)
+							if(rf.dma_mode==DMA_Character_Match_Mode)
 							{
-								rf.MQTT.Get_CMD=2;
+								BSP_UART_DMA_IDEL_IT_Mode();
+								BSP_RF_Start_dma_receive();
+								rf.dma_mode=DMA_IDEL_IT_Mode;
 							}
-							else if(rf.MQTT.Get_CMD==2)
-							{
-								 BSP_RF_RS9116_JSON_Decode();
-
-							}	
 					break;
 
 		
@@ -245,8 +233,20 @@ void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
 	
 	}
 }
+/**
+  *@brief  UART RX DMA IDEL match Handler
+  *@param  None
+	*@retval None
+  *@author YZTEK Wilson
+  *
+  */
+void BSP_UART_RX_DMA_IDEL_IT_Handler(void)
+{
+	
+	BSP_RF_RS9116_JSON_Decode();
+	BSP_RF_Clear_buffer((uint8_t *)rf.m_rx_buf,strlen(rf.m_rx_buf));//clearerr rx buffer
 
-
+}
 /**
   *@brief  API for UART DMA receive
   *@param  none
@@ -295,15 +295,19 @@ void BSP_RF_AT_Command_Send(const char * command)
   */
 void BSP_RF_AT_Command_Communication(const char * command,RS9116_State_t Next_State ,uint32_t timeout)
 {
-
+	/*Check DMA mode */
+	if(rf.dma_mode==DMA_IDEL_IT_Mode)
+	{
+		BSP_UART_DMA_Character_Match_IT_Mode();
+		rf.dma_mode=DMA_Character_Match_Mode;
+	}
 
 	BSP_UART_TransmitBlocking((uint8_t *)rsi_cmd.AT_RSI_,7,10);
-	
 	BSP_UART_TransmitBlocking((uint8_t *)command,strlen(command),10);
-
   BSP_UART_TransmitBlocking((uint8_t *)rsi_cmd.Newline,2,10);
 	BSP_RF_Start_dma_receive();
-	uint32_t last_time=HAL_GetTick();
+	static uint32_t last_time;
+	last_time=HAL_GetTick();
 	while(1)
 	{
 		/**@TBD Can do something here while DMA wating */
@@ -451,8 +455,10 @@ void BSP_RF_RS9116_JSON_Decode(void)
   */
 bool BSP_RF_RS9116_Init(void)
 {
-	//memset(TX_buffer, '\0', strlen(TX_buffer));	
+	BSP_UART_DMA_Character_Match_IT_Mode();
+  rf.dma_mode=DMA_Character_Match_Mode;
 	/*ReSet Module*/	
+	//BSP_UART_DMA_Character_Match_IT_Mode();
 	BSP_RF_AT_Command_Send(rsi_cmd.rest);
 	HAL_Delay(1000);
 	BSP_RF_AT_Send_FS();
@@ -658,7 +664,8 @@ bool BSP_RF_RS9116_MQTT_Connect(void)
   */
 bool BSP_RF_RS9116_MQTT_DisConnect(void)
 {
-
+	BSP_UART_DMA_Character_Match_IT_Mode();
+  rf.dma_mode=DMA_Character_Match_Mode;
 	memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
 	strcat(rf.m_tx_buf, rsi_cmd.MQTT);
 	strcat(rf.m_tx_buf, rsi_data.MQTT_disCon);
@@ -818,6 +825,18 @@ RS9116_State_t BSP_RF_get_module_status(void)
 	return rf.rs_state;
 
 }
+/**
+  *@brief  BSP  Get DMA receive mode
+  *@param  None
+	*@retval DMA_MODE_T
+  *@author YZTEK Wilson
+  *
+  */
+DMA_MODE_T BSP_RF_Get_DMA_mode(void)
+{
 
+	return rf.dma_mode;
+
+}
 #endif
 /************************ (C) COPYRIGHT  YZTek *****END OF FILE****/

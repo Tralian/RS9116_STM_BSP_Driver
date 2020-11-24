@@ -89,7 +89,7 @@ Using this python script, In Hardware setting is more simple  just connect STM a
 
 I'm working at a Start-up Company in Taiwan ,I'm very new at HW and FW design, but need lead  whole project\(actually only me  in the team at beginning\), you can image that how hopeless and helpless at that period.
 
- Luckily, I met my mentor  Zhih-Tai, Liu last year \(He is a freelancer and also have a  [Electro-Hedgehog](https://www.tasker.com.tw/workroom/3KWQr) in Taiwan Tasker \), He teach me a lot at HW designed and FW coding concept. We often discussing some designed over and over again excitedly  
+ Luckily, I met my mentor  Zhih-Tai, Liu last year \(He is a freelancer and also have a  [Electro-Hedgehog](https://www.tasker.com.tw/workroom/3KWQr) in Taiwan Tasker \), He teach me a lot at HW designed and FW coding concept. We often discussing some designed excitedly  
 
  so I decide pass this passion to who struggling in  same situation but no have abundant  resource 
 

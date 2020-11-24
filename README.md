@@ -14,6 +14,8 @@ Redpine have abundant example coed with WIFI host, but most of that are is for s
 
 ![This is the flow chart implement  RS9116 Using RS9116 EVM into STM32 Nucleo board](.gitbook/assets/image.png)
 
+                 This is the flow chart implement RS9116 Using RS9116 EVM into STM32 Nucleo board
+
 ##  1.RS9116 EVM Firmware update
 
  Need  update RS9116 module FW to Version 2.0  \( Different FW version will effect AT Command  parameter\)  ,  Can just reference silicon lab opensource document below
@@ -37,6 +39,8 @@ In my library have using DMA UART peripheral .need config first\( also can just 
 Note 1: Can't using DMA channel 3 used for UART data reception
 
 ![STM32F42xx and STM32F43xx Errata sheet](.gitbook/assets/image%20%285%29.png)
+
+                                                      STM32F42xx and STM32F43xx Errata sheet
 
 ### 2.Import bsp\_rf/bsp\_uart library to STM project
 
@@ -73,6 +77,8 @@ Unfortunately, In RS9116 EVM Board don't have TX/RX pinout directly\(can't bypas
 
 ![RS9116 EVM Sch ](.gitbook/assets/image%20%282%29.png)
 
+                                                                              RS9116 EVM Sch
+
 
 
 
@@ -81,9 +87,13 @@ In the end I wrote a python script, just simple exchange data between two virtua
 
 ![Serial data exchange Block diagram ](.gitbook/assets/image%20%283%29.png)
 
+                                                             Serial data exchange Block diagram
+
 Using this python script, In Hardware setting is more simple  just connect STM and RSI 9116 EVM\(J21\)  in USB port .After Execute python script , choose right virtual comport , it will start working
 
 ![screen shot: python script ](.gitbook/assets/image%20%284%29.png)
+
+                                                                       screen shot: python script
 
 ##  Why Opensource 
 

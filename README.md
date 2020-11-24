@@ -32,7 +32,7 @@ so my project also provide python script at one click
 
 ## _3.STM board setting and Import library_
 
-### 1.Create STM project 
+#### 1.Create STM project 
 
 In my library have using DMA UART peripheral .need config first\( also can just modify form my example , just slight change in GPIO port and DMA channel \)
 
@@ -42,13 +42,13 @@ Note 1: Can't using DMA channel 3 used for UART data reception
 
  
 
-`<center>`STM32F42xx and STM32F43xx Errata sheet`</center>`
+STM32F42xx and STM32F43xx Errata sheet
 
 
 
-### 2.Import bsp\_rf/bsp\_uart library to STM project
+#### 2.Import bsp\_rf/bsp\_uart library to STM project
 
-### 3.Config MQTT setting in bsp\_rf.c
+#### 3.Config MQTT setting in bsp\_rf.c
 
 ```c
 const char * SSID="Yours WIFI";
@@ -64,7 +64,7 @@ const char * MQTT_En_clean_session="1";
 const char * MQTT_En_keep_alive_interval="1";
 ```
 
-### 5.Running Testing code  in main c
+#### 5.Running Testing code  in main c
 
 ```c
 	BSP_RF_RS9116_Init();

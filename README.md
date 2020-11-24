@@ -32,7 +32,7 @@ so my project also provide python script at one click
 
 ## _3.STM board setting and Import library_
 
-#### 1.Create STM project 
+#### \(1\).Create STM project 
 
 In my library have using DMA UART peripheral .need config first\( also can just modify form my example , just slight change in GPIO port and DMA channel \)
 
@@ -40,15 +40,9 @@ Note 1: Can't using DMA channel 3 used for UART data reception
 
 ![STM32F42xx and STM32F43xx Errata sheet](.gitbook/assets/image%20%285%29.png)
 
- 
+#### \(2\).Import bsp\_rf/bsp\_uart library to STM project
 
-STM32F42xx and STM32F43xx Errata sheet
-
-
-
-#### 2.Import bsp\_rf/bsp\_uart library to STM project
-
-#### 3.Config MQTT setting in bsp\_rf.c
+#### \(3\).Config MQTT setting in bsp\_rf.c
 
 ```c
 const char * SSID="Yours WIFI";
@@ -64,7 +58,7 @@ const char * MQTT_En_clean_session="1";
 const char * MQTT_En_keep_alive_interval="1";
 ```
 
-#### 5.Running Testing code  in main c
+#### \(4\).Running Testing code  in main c
 
 ```c
 	BSP_RF_RS9116_Init();
@@ -81,23 +75,13 @@ Unfortunately, In RS9116 EVM Board don't have TX/RX pinout directly\(can't bypas
 
 ![RS9116 EVM Sch ](.gitbook/assets/image%20%282%29.png)
 
-                                                                              RS9116 EVM Sch
-
-
-
-
-
 In the end I wrote a python script, just simple exchange data between two virtual comport ,and monitor by CMD\( you also can find this script form my git project\),Block diagram is below
 
 ![Serial data exchange Block diagram ](.gitbook/assets/image%20%283%29.png)
 
-                                                             Serial data exchange Block diagram
-
 Using this python script, In Hardware setting is more simple  just connect STM and RSI 9116 EVM\(J21\)  in USB port .After Execute python script , choose right virtual comport , it will start working
 
 ![screen shot: python script ](.gitbook/assets/image%20%284%29.png)
-
-                                                                       screen shot: python script
 
 ##  Why Opensource 
 

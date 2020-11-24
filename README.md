@@ -2,7 +2,7 @@
 
 ## Why I choose Redpine RSI9116
 
-Recently. I'm studying in  low power consumption module for WI-FI application, I using Texas Instruments CC3220 MCU develop my project at the beginning. Although CC3220 have great performed at power consumption and easy using platform\(have a lot  Free RTOS resource \).but it can't change Main clock source\(just fix at 80MHz\), It will be okay with some project, but it will be deadly problem with project using battery .At the same time I found Redpine RSI9116\(maybe recent Silicon labs acquisition it\),Have better  WI-FI power consumption than CC3220, And can connect it just thought AT command. It's the gospel for me
+Recently. I'm studying in  low power consumption module for WI-FI application, I using Texas Instruments CC3220 MCU develop my project at the beginning. CC3220 have great performed at power consumption and easy using platform\(have a lot  Free RTOS resource \), have another m0 MCU inside the SoC which can building application code. But it can't change main clock source\(just fix at 80MHz\), It will be okay with some project, but it will be deadly problem with project using battery .At the same time I found Redpine RSI9116\(maybe recent Silicon labs acquisition it\),Have better  WI-FI power consumption than CC3220, And can connect it just thought AT command. It totally fitty my demand ,almost the gospel for me
 
 ## Why write library by myself
 

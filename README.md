@@ -10,29 +10,33 @@ Redpine have abundant example coed with WIFI host, but most of that are is for s
 
 
 
-## Develop Flow Chart
+## Implement Flow Chart
 
-![ Implement Flow chart](.gitbook/assets/image.png)
-
-#### This is the flow chart implement  RS9116 Using RS9116 EVM and STM32 Nucleo board
+![This is the flow chart implement  RS9116 Using RS9116 EVM into STM32 Nucleo board](.gitbook/assets/image.png)
 
 ##  1.RS9116 EVM Firmware update
 
-When star you project Need  update  EVM FW at first\( Different FW version will effect AT Command parameter\)  , it can reference silicon lab opensource document.
+ Need  update RS9116 module FW to Version 2.0  \( Different FW version will effect AT Command  parameter\)  ,  Can just reference silicon lab opensource document below
 
  [AN1290: RS9116W Firmware Update Application Note](https://www.silabs.com/documents/login/application-notes/an1290-rs9116w-firmware-update-application-note.pdf)
 
 ## 2.Load AWS Certificate using python script
 
+For security ,Burn certificate in module before using  it is  better way than sent by host MCU
+
 Silicon provide simple Python 2.7 script to upload AWS certificate to RS9116 module. but little complex.
 
-so my work mate rewrite it ,you also can find python script in my project
+so my project also provide python script at one click 
 
 ## _3.STM board setting and Import library_
 
 ### 1.Create STM project 
 
 In my library have using DMA UART peripheral .need config first\( also can just modify form my example , just slight change in GPIO port and DMA channel I though\)
+
+Note 1: Can't using DMA channel 3 used for UART data reception
+
+![STM32F42xx and STM32F43xx Errata sheet](.gitbook/assets/image%20%285%29.png)
 
 ### 2.Import bsp\_rf/bsp\_uart library to STM project
 
@@ -52,16 +56,7 @@ const char * MQTT_En_clean_session="1";
 const char * MQTT_En_keep_alive_interval="1";
 ```
 
-### 4.Config MQTT Topic in main c
-
-```c
-const char * MQTT_Sub_Topic="topic/Subcribe";
-const char * MQTT_Pub_Topic="topic/Publish";
-```
-
-
-
-### 5.Config MQTT Topic in main c
+### 5.Running Testing code  in main c
 
 ```c
 	BSP_RF_RS9116_Init();

@@ -32,7 +32,7 @@ so my project also provide python script at one click
 
 ### 1.Create STM project 
 
-In my library have using DMA UART peripheral .need config first\( also can just modify form my example , just slight change in GPIO port and DMA channel I though\)
+In my library have using DMA UART peripheral .need config first\( also can just modify form my example , just slight change in GPIO port and DMA channel \)
 
 Note 1: Can't using DMA channel 3 used for UART data reception
 
@@ -69,25 +69,29 @@ const char * MQTT_En_keep_alive_interval="1";
 
 ## 4.Test
 
-Unfortunately, In RS9116 EVM Board don't have TX/RX pinout\(can't bypass form USB virtual comport driver like cp2302 \), I try connect GPIO\_8 \(RSI9116 TX\),GPIO\_9 \(RSI9116 RX\) by jumper . and USB port just plug in Power port . But still have some bug and unstable\(If have better solution please tell me\)
+Unfortunately, In RS9116 EVM Board don't have TX/RX pinout directly\(can't bypass form USB virtual comport driver at EVM \), I try connect GPIO\_8 \(RSI9116 TX\),GPIO\_9 \(RSI9116 RX\) by jumper . and USB port just plug in\(J23\) Power port \(Not \(J21\)UART port \). But still have some bug and unstable\(If have better solution please tell me\)
 
 ![RS9116 EVM Sch ](.gitbook/assets/image%20%282%29.png)
+
+
+
+
 
 In the end I wrote a python script, just simple exchange data between two virtual comport ,and monitor by CMD\( you also can find this script form my git project\),Block diagram is below
 
 ![Serial data exchange Block diagram ](.gitbook/assets/image%20%283%29.png)
 
-So using this python script, In Hardware setting   just connect STM and RSI 9116 EVM  in USB port .After Execute python script , chose you comport ,then you can start your project
+Using this python script, In Hardware setting is more simple  just connect STM and RSI 9116 EVM\(J21\)  in USB port .After Execute python script , choose right virtual comport , it will start working
 
-![python script screen shot](.gitbook/assets/image%20%284%29.png)
+![screen shot: python script ](.gitbook/assets/image%20%284%29.png)
 
 ##  Why Opensource 
 
-I'm working at a Start-up Company in Taiwan ,I'm very new at HW and FW design, but need lead  whole project\(actually only me in the team at beginning\), you can image that how hopeless and helpless at that period
+I'm working at a Start-up Company in Taiwan ,I'm very new at HW and FW design, but need lead  whole project\(actually only me  in the team at beginning\), you can image that how hopeless and helpless at that period.
 
- Luckly, I met my mentor  Zhih-Tai, Liu last year \(He is a freelancer and also have a  [Electro-Hedgehog](https://www.tasker.com.tw/workroom/3KWQr) in Taiwan Tasker \), He teach me a lot at HW designed and FW structure. We often discussing some designed over and over again excitedly  
+ Luckily, I met my mentor  Zhih-Tai, Liu last year \(He is a freelancer and also have a  [Electro-Hedgehog](https://www.tasker.com.tw/workroom/3KWQr) in Taiwan Tasker \), He teach me a lot at HW designed and FW structure. We often discussing some designed over and over again excitedly  
 
- so I decide pass this passion to other one who struggle with problem but no have abundant  resource 
+ so I decide pass this passion to who struggling in  same situation but no have abundant  resource 
 
 In the end , thank my partner chase hu, you are so support no only in HW and ME but also in  design ideas
 

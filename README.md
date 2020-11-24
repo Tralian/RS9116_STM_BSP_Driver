@@ -12,9 +12,9 @@ Redpine have abundant example coed with WIFI host, but most of that are is for s
 
 ## Implement Flow Chart
 
-![This is the flow chart implement  RS9116 Using RS9116 EVM into STM32 Nucleo board](.gitbook/assets/image.png)
+  This is the flow chart implement RS9116 AT Command BSP Using  STM32 Nucleo board
 
-                 This is the flow chart implement RS9116 Using RS9116 EVM into STM32 Nucleo board
+![](.gitbook/assets/image.png)
 
 ##  1.RS9116 EVM Firmware update
 
@@ -40,7 +40,11 @@ Note 1: Can't using DMA channel 3 used for UART data reception
 
 ![STM32F42xx and STM32F43xx Errata sheet](.gitbook/assets/image%20%285%29.png)
 
-                                                      STM32F42xx and STM32F43xx Errata sheet
+ 
+
+`<center>`STM32F42xx and STM32F43xx Errata sheet`</center>`
+
+
 
 ### 2.Import bsp\_rf/bsp\_uart library to STM project
 

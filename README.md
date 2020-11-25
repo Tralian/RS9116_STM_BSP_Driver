@@ -45,7 +45,7 @@ Note 1: Can't using DMA channel 3 used for UART data reception
 #### \(3\).Config MQTT setting in bsp\_rf.c
 
 ```c
-const char * SSID="Yours WIFI";
+const char * SSID="WIFI SSID";
 const char * SSID_password="Yours WIFI password";
 const char * AWS_endpoint="--Yours AWS endpoint----.iot.----.amazonaws.com";
 const char * MQTT_Server_Port="8883";
@@ -56,17 +56,47 @@ const char * MQTT_client_port="5503";
 const char * MQTT_keep_alive_interval="80";
 const char * MQTT_En_clean_session="1";
 const char * MQTT_En_keep_alive_interval="1";
+
+const char * MQTT_Sub_Topic="topic/Sub";
+const char * MQTT_Pub_Topic="topic/Pub";
+const char * MQTT_Sub_Objet="{\"msg\":";
 ```
 
 #### \(4\).Running Testing code  in main c
 
 ```c
+int main(void)
+{
+
+  HAL_Init();  
+  SystemClock_Config(); 
+  MX_GPIO_Init();  
+	BSP_UART_Init();
+	
 	BSP_RF_RS9116_Init();
+	
   BSP_RF_RS9116_WIFI_Connect();
-  BSP_RF_RS9116_MQTT_Connect();
-  
-  HAL_Delay(5000);
-  BSP_RF_RS9116_MQTT_DisConnect();
+	BSP_RF_RS9116_MQTT_Connect();
+	/*MQTT Subscribe */
+	BSP_RF_RS9116_MQTT_Subscribe((char *)MQTT_Sub_Topic);
+	
+	/*MQTT Publish */
+  static char mqtt_pub_data[100];
+	BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"Object1","Data1","Object2","On");
+  BSP_RF_RS9116_MQTT_Publish((char *)MQTT_Pub_Topic,mqtt_pub_data);
+	BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"Object2","Data1","state","Off");
+  BSP_RF_RS9116_MQTT_Publish((char *)MQTT_Pub_Topic,mqtt_pub_data);
+
+  while (1)
+	{
+
+
+			if(BSP_RF_MQTT_CMD_Pop()!=CMD_EMPTY)
+			{
+					BSP_RF_RS9116_MQTT_DisConnect();
+			}
+  }
+}
 ```
 
 ## 4.Test

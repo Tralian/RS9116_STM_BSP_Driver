@@ -14,7 +14,7 @@ Redpine have abundant example coed with WIFI host, but most of that are is for s
 
   This is the flow chart implement RS9116 AT Command BSP Using  STM32 Nucleo board
 
-![](.gitbook/assets/image.png)
+![](.gitbook/assets/image.png,"image-captions")
 
 ##  1.RS9116 EVM Firmware update
 

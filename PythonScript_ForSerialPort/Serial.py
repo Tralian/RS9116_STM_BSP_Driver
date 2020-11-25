@@ -42,10 +42,10 @@ if __name__ == '__main__':
 #Connect to port
 ###################################################
 #name = input('RSI Port：')
-#Host_COM_PORT = input('\n\nType in host com port：')
-#RSI_COM_PORT = input('\n\nType in RSI  com port：')
-Host_COM_PORT ='COM20'
-RSI_COM_PORT = 'COM39'
+Host_COM_PORT = input('\n\nType in host com port：')
+RSI_COM_PORT = input('\n\nType in RSI  com port：')
+#Host_COM_PORT ='COM20'
+#RSI_COM_PORT = 'COM39'
 
 BAUD_RATES = 115200
 Host_COM = serial.Serial(Host_COM_PORT, BAUD_RATES)

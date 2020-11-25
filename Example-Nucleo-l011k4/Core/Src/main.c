@@ -61,9 +61,9 @@ int main(void)
 	
 	/*MQTT Publish */
   static char mqtt_pub_data[100];
-	BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"udid","NECCUIUaAZDC","s","2");
+	BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"Object1","Data1","Object1","2");
   BSP_RF_RS9116_MQTT_Publish((char *)MQTT_Pub_Topic,mqtt_pub_data);
-	BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"udid","NECCUIUaAZDC","s","1");
+	BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"Object2","Data1","Object2","1");
   BSP_RF_RS9116_MQTT_Publish((char *)MQTT_Pub_Topic,mqtt_pub_data);
 
   while (1)

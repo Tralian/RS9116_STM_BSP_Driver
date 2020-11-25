@@ -41,15 +41,15 @@ typedef enum
 
 
 /**@For User Config ***********************************************************/
-const char * SSID="myLoad";
-const char * SSID_password="0912345678";
+const char * SSID="SSID";
+const char * SSID_password="Password";
 //const char * SSID="Wei";
 //const char * SSID_password="50882056";
-const char * AWS_endpoint="av9pn5o54ct6w-ats.iot.ap-northeast-1.amazonaws.com";
+const char * AWS_endpoint="AWS-end-point.amazonaws.com";
 
 
 const char * MQTT_Server_Port="8883";
-const char * Device_ID="NECCUIUaAZDC";
+const char * Device_ID="Test1";
 
 const char * MQTT_username="username";
 const char * MQTT_password="password";
@@ -60,9 +60,9 @@ const char * MQTT_En_clean_session="1";
 const char * MQTT_En_keep_alive_interval="1";
 
 
-const char * MQTT_Sub_Topic="yztek/ty002/d/NECCUIUaAZDC";
-const char * MQTT_Pub_Topic="yztek/ty002/s";
-const char * MQTT_Sub_Objet="{\"msg\":";
+const char * MQTT_Sub_Topic="topic/Sub";
+const char * MQTT_Pub_Topic="topic/Pub";
+const char * MQTT_Sub_Objet="{\"message\":";
 
 /*******************************************************************************/
 

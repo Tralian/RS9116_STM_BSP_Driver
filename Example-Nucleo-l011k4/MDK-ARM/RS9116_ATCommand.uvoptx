@@ -152,41 +152,73 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>211</LineNumber>
+          <LineNumber>142</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134220582</Address>
+          <Address>0</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Drivers\BSP\Src\bsp_rf.c</Filename>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>../Core/Src/stm32l0xx_hal_msp.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\RS9116_ATCommand\../Drivers/BSP/Src/bsp_rf.c\211</Expression>
+          <Expression></Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>108</LineNumber>
+          <LineNumber>135</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134226770</Address>
+          <Address>134224932</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>../Core/Src/stm32l0xx_it.c</Filename>
+          <Filename>../Core/Src/stm32l0xx_hal_msp.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\RS9116_ATCommand\../Core/Src/stm32l0xx_it.c\108</Expression>
+          <Expression>\\RS9116_ATCommand\../Core/Src/stm32l0xx_hal_msp.c\135</Expression>
         </Bp>
         <Bp>
           <Number>2</Number>
           <Type>0</Type>
-          <LineNumber>247</LineNumber>
+          <LineNumber>136</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134220650</Address>
+          <Address>134224942</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>../Core/Src/stm32l0xx_hal_msp.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\RS9116_ATCommand\../Core/Src/stm32l0xx_hal_msp.c\136</Expression>
+        </Bp>
+        <Bp>
+          <Number>3</Number>
+          <Type>0</Type>
+          <LineNumber>132</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134224922</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>../Core/Src/stm32l0xx_hal_msp.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\RS9116_ATCommand\../Core/Src/stm32l0xx_hal_msp.c\132</Expression>
+        </Bp>
+        <Bp>
+          <Number>4</Number>
+          <Type>0</Type>
+          <LineNumber>901</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134220012</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -195,7 +227,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\Drivers\BSP\Src\bsp_rf.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\RS9116_ATCommand\../Drivers/BSP/Src/bsp_rf.c\247</Expression>
+          <Expression>\\RS9116_ATCommand\../Drivers/BSP/Src/bsp_rf.c\901</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -207,7 +239,12 @@
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>JSON</ItemText>
+          <ItemText>Test</ItemText>
+        </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>temp_32</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -586,7 +623,7 @@
       <GroupNumber>5</GroupNumber>
       <FileNumber>24</FileNumber>
       <FileType>1</FileType>
-      <tvExp>0</tvExp>
+      <tvExp>1</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Drivers\BSP\Src\bsp_rf.c</PathWithFileName>

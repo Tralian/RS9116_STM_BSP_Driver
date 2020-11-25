@@ -109,7 +109,7 @@ static RSI_AT_COMMAND_PARAMETER_t rsi_data=
 
 
 
-static RF_Ctrl_t rf;
+static RF_Ctrl_t rf={.DMA_IT_Character=0x0A};
 /*For RS9116 AT Command*/
 /************************ Private functions Prototype************************/
 void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void);
@@ -144,15 +144,6 @@ void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
 		if(*(rf.m_rx_buf+i)=='O'&&*(rf.m_rx_buf+i+1)=='K')
 		{
 	  	rf.error_code=None_error;	
-			/*check Publishing/Publishing is done or not*/
-			if(rf.MQTT.Publishing==true)
-			{
-				rf.MQTT.Publishing=false;
-			}
-			else if(rf.MQTT.Subscribing==true)
-			{
-				rf.MQTT.Subscribing=false;
-			}
 			break;
 		}
 		/*Get Error CMD form RF module*/
@@ -161,6 +152,15 @@ void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
 	  	rf.error_code=AT_Respond_Error;		
 			break;
 		}	
+		/*Get data form MQTT broker )*/
+  	if(memcmp((void *)(rf.m_rx_buf+i),(void *)MQTT_Sub_Topic,strlen(MQTT_Sub_Topic))==0)
+		{
+			i=i;
+
+			break;
+		}		
+		
+		
 	}
 	if(	 rf.error_code==None_error)
 	{
@@ -212,11 +212,22 @@ void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
 							{
 								BSP_RF_set_status(S_is_WIFI_Connected);
 							}
-							if(rf.dma_mode==DMA_Character_Match_Mode)
+							if(rf.MQTT.mqtt_state==MQTT_Subscribing)
 							{
-								BSP_UART_DMA_IDEL_IT_Mode();
+									rf.MQTT.mqtt_state=MQTT_Subscribed;
+							}
+							else if(rf.MQTT.mqtt_state==MQTT_Publishing)
+							{
+									rf.MQTT.mqtt_state=MQTT_Published;
+
+							}
+
+							if(BSP_RF_Get_DMA_character_match_word()==0x0A)
+							{
+					      BSP_RF_Clear_buffer((uint8_t *)rf.m_rx_buf,RX_BUFFER_SIZE);
+								BSP_RF_Set_DMA_character_match(0x0D);
 								BSP_RF_Start_dma_receive();
-								rf.dma_mode=DMA_IDEL_IT_Mode;
+
 							}
 					break;
 
@@ -224,8 +235,6 @@ void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
 				case S_LowerPowerMode:
 					break;		
 			}
-			BSP_RF_Clear_buffer((uint8_t *)rf.m_rx_buf,strlen(rf.m_rx_buf));//clearerr rx buffer
-
   }
 	else
 	{
@@ -240,13 +249,34 @@ void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
   *@author YZTEK Wilson
   *
   */
-void BSP_UART_RX_DMA_IDEL_IT_Handler(void)
-{
-	
-	BSP_RF_RS9116_JSON_Decode();
-	BSP_RF_Clear_buffer((uint8_t *)rf.m_rx_buf,strlen(rf.m_rx_buf));//clearerr rx buffer
+//void BSP_UART_RX_DMA_IDEL_IT_Handler(uint16_t data_len)
+//{
+//	static uint8_t i=0;
+//	if(data_len==0)
+//	{
+//			return;
+//	}
+//	for(i=0;i<RX_BUFFER_SIZE;i++)
+//	{
+//	
+//		/*Get data form RF module*/
+//  	if(memcmp((void *)(rf.m_rx_buf+i),(void *)MQTT_Sub_Topic,strlen(MQTT_Sub_Topic))==0)
+//		{
+//			BSP_UART_StopDMA();/*Stop DMA*/
+//			
+//			i=i;
+//      BSP_RF_Clear_buffer((uint8_t *)rf.m_rx_buf,RX_BUFFER_SIZE);//clearerr rx buffer
+//			
+//			BSP_RF_Start_dma_receive();
 
-}
+//			break;
+//		}
+//			
+//	
+//	}
+//	//BSP_RF_RS9116_JSON_Decode();
+
+//}
 /**
   *@brief  API for UART DMA receive
   *@param  none
@@ -296,11 +326,17 @@ void BSP_RF_AT_Command_Send(const char * command)
 void BSP_RF_AT_Command_Communication(const char * command,RS9116_State_t Next_State ,uint32_t timeout)
 {
 	/*Check DMA mode */
-	if(rf.dma_mode==DMA_IDEL_IT_Mode)
+	
+//	if(rf.dma_mode==DMA_IDEL_IT_Mode)
+//	{
+//		BSP_UART_DMA_Character_Match_IT_Mode();
+//		rf.dma_mode=DMA_Character_Match_Mode;
+//	}
+	if(BSP_RF_Get_DMA_character_match_word()==0x0A0000)
 	{
-		BSP_UART_DMA_Character_Match_IT_Mode();
-		rf.dma_mode=DMA_Character_Match_Mode;
+		BSP_RF_Set_DMA_character_match(0x0D);
 	}
+	BSP_RF_Clear_buffer((uint8_t *)rf.m_rx_buf,RX_BUFFER_SIZE);//clearerr rx buffer
 
 	BSP_UART_TransmitBlocking((uint8_t *)rsi_cmd.AT_RSI_,7,10);
 	BSP_UART_TransmitBlocking((uint8_t *)command,strlen(command),10);
@@ -430,18 +466,7 @@ void BSP_RF_Get_String_Length(const char * Buffer)
 void BSP_RF_RS9116_JSON_Decode(void)
 {
 
-	for(uint8_t i=0;i<strlen(rf.m_rx_buf);i++)
-	{
-	
-		/*Get data form RF module*/
-  	if(memcmp((void *)(rf.m_rx_buf+i),(void *)MQTT_Sub_Topic,strlen(MQTT_Sub_Topic))==0)
-		{
 
-			break;
-		}
-			
-	
-	}
 
 }
 /************************ Exported function implementation************************/
@@ -455,8 +480,8 @@ void BSP_RF_RS9116_JSON_Decode(void)
   */
 bool BSP_RF_RS9116_Init(void)
 {
-	BSP_UART_DMA_Character_Match_IT_Mode();
-  rf.dma_mode=DMA_Character_Match_Mode;
+//	BSP_UART_DMA_Character_Match_IT_Mode();
+  //rf.dma_mode=DMA_Character_Match_Mode;
 	/*ReSet Module*/	
 	//BSP_UART_DMA_Character_Match_IT_Mode();
 	BSP_RF_AT_Command_Send(rsi_cmd.rest);
@@ -664,8 +689,8 @@ bool BSP_RF_RS9116_MQTT_Connect(void)
   */
 bool BSP_RF_RS9116_MQTT_DisConnect(void)
 {
-	BSP_UART_DMA_Character_Match_IT_Mode();
-  rf.dma_mode=DMA_Character_Match_Mode;
+//	BSP_UART_DMA_Character_Match_IT_Mode();
+//  rf.dma_mode=DMA_Character_Match_Mode;
 	memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
 	strcat(rf.m_tx_buf, rsi_cmd.MQTT);
 	strcat(rf.m_tx_buf, rsi_data.MQTT_disCon);
@@ -689,7 +714,7 @@ bool BSP_RF_RS9116_MQTT_DisConnect(void)
   */
 bool BSP_RF_RS9116_MQTT_Publish(char * Topic,char * data)
 {
-  rf.MQTT.Publishing=true;
+  rf.MQTT.mqtt_state=MQTT_Publishing;
 	memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
 	strcat(rf.m_tx_buf, rsi_cmd.MQTT);
 	strcat(rf.m_tx_buf, rsi_data.MQTT_Pub);
@@ -704,15 +729,24 @@ bool BSP_RF_RS9116_MQTT_Publish(char * Topic,char * data)
 	strcat(rf.m_tx_buf, data);
 	BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_MQTT_Con,TIME_OUT_MQTT_MS);
 	/*Need implement delay if wantna check repond */
-	if(rf.MQTT.Publishing==false)
+	
+	uint32_t last_time=HAL_GetTick();
+	while(1)
 	{
-			return true;
-	}
-	else
-	{
-		 return false;
+		if(HAL_GetTick()-last_time>TIME_OUT_MQTT_MS)
+		{
+			rf.error_code=Published_Timeout;
+			return false;
 
+		}
+		if(rf.MQTT.mqtt_state==MQTT_Published)
+		{	
+			return true;
+
+		}
+	
 	}
+
 }
 /**
   *@brief  Transform data  to JSON format
@@ -750,7 +784,7 @@ void BSP_RF_RS9116_JSON_Encode(char * JSON ,char * Object1,char * value1,char * 
 
 bool BSP_RF_RS9116_MQTT_Subscribe(char * Topic)
 {
-	  rf.MQTT.Subscribing=true;
+	  rf.MQTT.mqtt_state=MQTT_Subscribing;
 
 		memset(rf.m_tx_buf, '\0', strlen(rf.m_tx_buf));	
 		strcat(rf.m_tx_buf, rsi_cmd.MQTT);
@@ -761,14 +795,24 @@ bool BSP_RF_RS9116_MQTT_Subscribe(char * Topic)
 		strcat(rf.m_tx_buf, Topic);	
 		strcat(rf.m_tx_buf, ",1");	
 		BSP_RF_AT_Command_Communication(rf.m_tx_buf,S_MQTT_Con,TIME_OUT_MQTT_MS);
-    if(rf.MQTT.Subscribing==false)
+	  
+	  uint32_t last_time=HAL_GetTick();
+    while(1)
 		{
-			return true;
+			if(HAL_GetTick()-last_time>TIME_OUT_MQTT_MS)
+			{
+				rf.error_code=Subscribe_Timeout;
+	    	return false;
+
+			}
+			if(rf.MQTT.mqtt_state==MQTT_Subscribed)
+			{
+	    	return true;
+			}
+		
 		}
-		else
-		{
-			 return false;
-		}
+
+		
 }
 
 
@@ -832,11 +876,41 @@ RS9116_State_t BSP_RF_get_module_status(void)
   *@author YZTEK Wilson
   *
   */
-DMA_MODE_T BSP_RF_Get_DMA_mode(void)
+//DMA_MODE_T BSP_RF_Get_DMA_mode(void)
+//{
+
+//	return rf.dma_mode;
+
+//}
+
+
+
+/**
+  *@brief  API for Setting Character match word ,Will ReInit UART
+  *@param  none
+  *@retval none
+  *				 
+  *@author YZTEK Wilson
+					 
+  */
+void BSP_RF_Set_DMA_character_match(uint8_t ch)
 {
-
-	return rf.dma_mode;
-
+	 //BSP_UART_StopDMA();
+	 BSP_UART_DeInit();
+	 rf.DMA_IT_Character=ch;
+	 BSP_UART_Init();
+}
+/**
+  *@brief  API for Getting Character match word
+  *@param  none
+  *@retval Character match word
+  *				 
+  *@author YZTEK Wilson
+					 
+  */
+uint32_t BSP_RF_Get_DMA_character_match_word(void)
+{
+	return rf.DMA_IT_Character;
 }
 #endif
 /************************ (C) COPYRIGHT  YZTek *****END OF FILE****/

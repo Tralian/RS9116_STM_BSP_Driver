@@ -22,6 +22,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "bsp_uart.h"
+#include "bsp_rf.h"
 
 
 /* Private typedef -----------------------------------------------------------*/
@@ -128,8 +129,10 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     }
 
     __HAL_LINKDMA(uartHandle,hdmatx,hdma_usart2_tx);
-		
-			USART2->CR2 |= 0x0A000000; //  \n 0x0A
+		uint8_t temp_8= BSP_RF_Get_DMA_character_match_word();
+    static uint32_t temp_32=0;
+		temp_32=temp_8<<24;
+		USART2->CR2 |= temp_32; //  \n 0x0A
 	  __HAL_UART_ENABLE_IT(&huart,UART_IT_CM);
 		
 		/* NVIC configuration for DMA transfer complete interrupt (USART2_RX) */

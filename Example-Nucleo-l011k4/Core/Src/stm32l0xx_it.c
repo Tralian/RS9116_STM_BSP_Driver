@@ -105,31 +105,29 @@ void DMA1_Channel2_3_IRQHandler(void)
 void USART2_IRQHandler(void)
 {
 	/**@TBD Temp solutiob */
-	if(BSP_RF_Get_DMA_mode()==DMA_Character_Match_Mode)
-	{
+
 		/*Character match interrupt*/
 			if(__HAL_UART_GET_IT(&huart, UART_IT_CM))
 			{
 				BSP_UART_StopDMA();/*Stop DMA*/
 				BSP_UART_RX_DMA_Character_Martch_IT_Handler();
+			  __HAL_UART_CLEAR_FLAG(&huart, UART_CLEAR_CMF);
 
 			}		
-		
-	}	
-	if(BSP_RF_Get_DMA_mode()==DMA_IDEL_IT_Mode)
-	{
-		/*Idle interrupt*/
-		if(__HAL_UART_GET_FLAG(&huart,UART_FLAG_IDLE)== SET)
-		{ 
-				/*Stop DMA*/
-				HAL_UART_DMAStop(&huart);
-				DMA_IDEL_IT_Get_data();	
+	
+//	if(BSP_RF_Get_DMA_mode()==DMA_IDEL_IT_Mode)
+//	{
+//		/*Idle interrupt*/
+//		if(__HAL_UART_GET_FLAG(&huart,UART_FLAG_IDLE)== SET)
+//		{ 
+//				/*Stop DMA*/
+//				BSP_UART_StopDMA();/*Stop DMA*/
+//				DMA_IDEL_IT_Get_data();	
+//       	__HAL_UART_CLEAR_FLAG(&huart,UART_CLEAR_OREF);//Clear Flag
+//	      __HAL_UART_CLEAR_FLAG(&huart, UART_CLEAR_IDLEF);
 
-		}	 
-	}  
-	__HAL_UART_CLEAR_FLAG(&huart, UART_CLEAR_CMF);
-	__HAL_UART_CLEAR_FLAG(&huart, UART_CLEAR_IDLEF);
-	__HAL_UART_CLEAR_FLAG(&huart,UART_CLEAR_OREF);//Clear Flag
+//		}	 
+//	}  
 
   HAL_UART_IRQHandler(&huart);
 

@@ -29,6 +29,7 @@
 
 #define TX_BUFFER_SIZE		100
 #define RX_BUFFER_SIZE	  170
+#define MQTT_DATA_BUFFER_SIZE 100
 #define MQTT_CMD_BUFFER_SIZE 10
 /* Exported types ------------------------------------------------------------*/
 /**@AT Command Struct*/
@@ -106,7 +107,9 @@ typedef enum
 	WIFI_Join_Error,
 	DHCP_Error,
 	DNS_IP_lost,
-	
+	Subscribe_Timeout,
+  Published_Timeout,
+
 }RS9116_ERROR_t;
 /**@CMD  User can add CMD here*/
 typedef enum
@@ -116,26 +119,34 @@ typedef enum
 	CMD_MQTT_Off,
 	
 }MQTT_CMD_t;
-
+/**@CMD  User can add CMD here*/
+typedef enum
+{
+	MQTT_None=0X00,
+	MQTT_Publishing,
+	MQTT_Published,
+	MQTT_Subscribing,
+	MQTT_Subscribed,
+}MQTT_Status;
 /**@MQTT infor */
 
 typedef struct
 {
   uint8_t    DNS_IP_hex[4];
 	char       DNS_IP_String[15];
-	bool       Subscribing;
-	bool    	 Publishing;
-  MQTT_CMD_t CMD_Buffer[MQTT_CMD_BUFFER_SIZE]; 
-	uint8_t    read_index;
-  
+  MQTT_Status mqtt_state;
+	
+	char        mqtt_recive_buf[MQTT_DATA_BUFFER_SIZE];
+  MQTT_CMD_t  CMD_Buffer[MQTT_CMD_BUFFER_SIZE]; 
+	uint8_t     read_index;
 }MQTT_t;
 /**@MQTT infor */
-typedef enum
-{
- DMA_Character_Match_Mode=0x00,
- DMA_IDEL_IT_Mode,
+//typedef enum
+//{
+// DMA_Character_Match_Mode=0x00,
+// DMA_IDEL_IT_Mode,
 
-}DMA_MODE_T;
+//}DMA_MODE_T;
 
 typedef struct
 {	
@@ -143,9 +154,12 @@ typedef struct
 	RS9116_ERROR_t error_code;
 	char   m_tx_buf[TX_BUFFER_SIZE] ;
 	char   m_rx_buf[RX_BUFFER_SIZE] ;
+	
 	char   string_data_length[3];
 	MQTT_t MQTT;
-	DMA_MODE_T dma_mode;
+	//DMA_MODE_T dma_mode;
+	uint8_t     DMA_IT_Character;
+
 }RF_Ctrl_t;
 
 /* Exported constants --------------------------------------------------------*/
@@ -170,8 +184,10 @@ void BSP_RF_RS9116_JSON_Encode(char * JSON ,char * Object1,char * value1,char * 
 
 void BSP_RF_set_status(RS9116_State_t stage);
 RS9116_State_t BSP_RF_get_module_status(void);
-DMA_MODE_T BSP_RF_Get_DMA_mode(void);
+//DMA_MODE_T BSP_RF_Get_DMA_mode(void);
 
+uint32_t BSP_RF_Get_DMA_character_match_word(void);
+void BSP_RF_Set_DMA_character_match(uint8_t ch);
 
 /* Linker functions ------------------------------------------------------- */
 

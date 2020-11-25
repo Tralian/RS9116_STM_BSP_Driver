@@ -1,7 +1,4 @@
-#import imp
-import sys   #reload()之前必須要引入模組
-#imp.reload(sys)
-#sys.setdefaultencoding('utf-8')
+import sys  
 import glob
 import serial
 import time

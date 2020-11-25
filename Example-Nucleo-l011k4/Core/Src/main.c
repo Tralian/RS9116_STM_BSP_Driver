@@ -56,20 +56,21 @@ int main(void)
 	
   BSP_RF_RS9116_WIFI_Connect();
 	BSP_RF_RS9116_MQTT_Connect();
-	HAL_Delay(5000);
 	/*MQTT Subscribe */
 	BSP_RF_RS9116_MQTT_Subscribe((char *)MQTT_Sub_Topic);
 	
 	/*MQTT Publish */
-  static char mqtt_pub_data[100];
-	BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"udid","NECCUIUaAZDC","s","2");
-  BSP_RF_RS9116_MQTT_Publish((char *)MQTT_Pub_Topic,mqtt_pub_data);
+//  static char mqtt_pub_data[100];
+//	BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"udid","NECCUIUaAZDC","s","2");
+//  BSP_RF_RS9116_MQTT_Publish((char *)MQTT_Pub_Topic,mqtt_pub_data);
 //	BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"udid","NECCUIUaAZDC","s","1");
 //  BSP_RF_RS9116_MQTT_Publish((char *)MQTT_Pub_Topic,mqtt_pub_data);
 //	HAL_Delay(5000);
 
   while (1)
 	{
+
+
 			if(BSP_RF_MQTT_CMD_Pop()==CMD_MQTT_On)
 			{
 					printf("Get MQTT On\r");

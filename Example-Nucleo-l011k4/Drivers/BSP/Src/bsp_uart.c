@@ -14,6 +14,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "bsp_uart.h"
+
 #include "stdio.h"
 /* Private typedef -----------------------------------------------------------*/
 
@@ -124,12 +125,12 @@ void BSP_UART_TransmitBlocking(uint8_t *byte_array, uint8_t size, uint16_t timeo
   *@author YZTEK Wilson
   *
   */
-void BSP_UART_DMA_Character_Match_IT_Mode(void)
-{
-	__HAL_UART_ENABLE_IT(&huart,UART_IT_CM);
-	__HAL_UART_DISABLE_IT(&huart,UART_IT_IDLE);
-	__HAL_UART_CLEAR_FLAG(&huart,UART_CLEAR_OREF);//Clear  if overrun data
-}
+//void BSP_UART_DMA_Character_Match_IT_Mode(void)
+//{
+//	__HAL_UART_ENABLE_IT(&huart,UART_IT_CM);
+//	__HAL_UART_DISABLE_IT(&huart,UART_IT_IDLE);
+//	__HAL_UART_CLEAR_FLAG(&huart,UART_CLEAR_OREF);//Clear  if overrun data
+//}
 /**
   *@brief  Disable  DMA Charracter Match IT and Enable DMA Idel IT
 	*@retval None

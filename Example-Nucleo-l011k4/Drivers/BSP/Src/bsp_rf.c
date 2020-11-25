@@ -34,6 +34,7 @@ typedef enum
 #define WIFI_DHCP_Try	        3
 #define WIFI_WIFI_Join_Try	  3
 #define DNS_IP_Try	          3
+     
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -61,6 +62,8 @@ const char * MQTT_En_keep_alive_interval="1";
 
 const char * MQTT_Sub_Topic="yztek/ty002/d/NECCUIUaAZDC";
 const char * MQTT_Pub_Topic="yztek/ty002/s";
+const char * MQTT_Sub_Objet="{\"msg\":";
+
 /*******************************************************************************/
 
 const RSI_AT_COMMAND_t rsi_cmd=
@@ -120,9 +123,10 @@ void BSP_RF_AT_Send_FS(void);
 void BSP_RF_AT_Send_Char(char ch);
 void BSP_RF_Clear_buffer(uint8_t *buffer,uint16_t length);
 DMA_Status_t BSP_RF_Get_DMA_RX_Status(void);
-bool BSP_RF_Decode_DNS(void);
+void BSP_RF_Decode_DNS(void);
+
 void BSP_RF_Get_String_Length(const char * Buffer);
-void BSP_RF_RS9116_JSON_Decode(void);
+void BSP_RF_MQTT_Data_Decode(uint8_t add);
 
 /************************ Private functions implementation************************/
 
@@ -153,9 +157,9 @@ void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
 			break;
 		}	
 		/*Get data form MQTT broker )*/
-  	if(memcmp((void *)(rf.m_rx_buf+i),(void *)MQTT_Sub_Topic,strlen(MQTT_Sub_Topic))==0)
+  	if(memcmp((void *)(rf.m_rx_buf+i),(void *)rsi_cmd.MQTT_READ,strlen(rsi_cmd.MQTT_READ))==0)
 		{
-			i=i;
+			BSP_RF_MQTT_Data_Decode(i+strlen(MQTT_Sub_Topic)+strlen(rsi_cmd.MQTT_READ));
 
 			break;
 		}		
@@ -194,11 +198,8 @@ void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
 							BSP_RF_set_status(S_is_WIFI_Connected);					
 					break;	
 				case S_is_WIFI_Connected:
-							if(BSP_RF_Decode_DNS()==true)
-							{
-								BSP_RF_set_status(S_DNS_get);
-							}
-															
+							  BSP_RF_Decode_DNS();
+								BSP_RF_set_status(S_DNS_get);											
 					break;
 				case S_DNS_get:
 							
@@ -242,41 +243,6 @@ void BSP_UART_RX_DMA_Character_Martch_IT_Handler(void)
 	
 	}
 }
-/**
-  *@brief  UART RX DMA IDEL match Handler
-  *@param  None
-	*@retval None
-  *@author YZTEK Wilson
-  *
-  */
-//void BSP_UART_RX_DMA_IDEL_IT_Handler(uint16_t data_len)
-//{
-//	static uint8_t i=0;
-//	if(data_len==0)
-//	{
-//			return;
-//	}
-//	for(i=0;i<RX_BUFFER_SIZE;i++)
-//	{
-//	
-//		/*Get data form RF module*/
-//  	if(memcmp((void *)(rf.m_rx_buf+i),(void *)MQTT_Sub_Topic,strlen(MQTT_Sub_Topic))==0)
-//		{
-//			BSP_UART_StopDMA();/*Stop DMA*/
-//			
-//			i=i;
-//      BSP_RF_Clear_buffer((uint8_t *)rf.m_rx_buf,RX_BUFFER_SIZE);//clearerr rx buffer
-//			
-//			BSP_RF_Start_dma_receive();
-
-//			break;
-//		}
-//			
-//	
-//	}
-//	//BSP_RF_RS9116_JSON_Decode();
-
-//}
 /**
   *@brief  API for UART DMA receive
   *@param  none
@@ -325,13 +291,7 @@ void BSP_RF_AT_Command_Send(const char * command)
   */
 void BSP_RF_AT_Command_Communication(const char * command,RS9116_State_t Next_State ,uint32_t timeout)
 {
-	/*Check DMA mode */
-	
-//	if(rf.dma_mode==DMA_IDEL_IT_Mode)
-//	{
-//		BSP_UART_DMA_Character_Match_IT_Mode();
-//		rf.dma_mode=DMA_Character_Match_Mode;
-//	}
+	BSP_UART_StopDMA();/*Stop DMA*/
 	if(BSP_RF_Get_DMA_character_match_word()==0x0A0000)
 	{
 		BSP_RF_Set_DMA_character_match(0x0D);
@@ -414,10 +374,9 @@ DMA_Status_t BSP_RF_Get_DMA_RX_Status(void)
   *@author YZTEK Wilson
   *
   */
-bool BSP_RF_Decode_DNS(void)
+void BSP_RF_Decode_DNS(void)
 {
 	uint16_t i=0;
-  uint8_t check[4]={0,0,0,0};
 	if( (rf.m_rx_buf[0]=='O') && (rf.m_rx_buf[1]=='K') )
 	{
 		if(rf.m_rx_buf[4]==2)
@@ -428,15 +387,6 @@ bool BSP_RF_Decode_DNS(void)
 				rf.MQTT.DNS_IP_hex[i]=rf.m_rx_buf[i+6];
 			}
 		}
-	}
-	/*Check DNS is exsit*/
-	if(  memcmp((void *)(rf.MQTT.DNS_IP_hex),(void *)check,4)==0  )
-	{
-		return false;
-	}
-	else
-	{
-		return true;
 	}
 }
 
@@ -463,10 +413,24 @@ void BSP_RF_Get_String_Length(const char * Buffer)
   *@author YZTEK Wilson
   *
   */
-void BSP_RF_RS9116_JSON_Decode(void)
+void BSP_RF_MQTT_Data_Decode(uint8_t add)
 {
+	memcpy( ( void *) rf.MQTT.mqtt_recive_buf , ( void *) (rf.m_rx_buf+add+6), MQTT_DATA_BUFFER_SIZE);
+	for(uint8_t i=0;i<strlen(MQTT_Sub_Objet);i++)
+	{
+	if(memcmp((void *)(rf.MQTT.mqtt_recive_buf),(void *)MQTT_Sub_Objet,strlen(MQTT_Sub_Objet))==0)
+		{
+			BSP_RF_Clear_buffer((uint8_t *)rf.MQTT.mqtt_recive_buf,MQTT_DATA_BUFFER_SIZE);
 
-
+			rf.MQTT.CMD_Buffer[rf.MQTT.write_index]=CMD_MQTT_Off;
+			rf.MQTT.write_index++;
+			if(rf.MQTT.write_index>=MQTT_CMD_BUFFER_SIZE)
+			{
+			  rf.MQTT.write_index=0;
+			}
+			break;
+		}
+	}		
 
 }
 /************************ Exported function implementation************************/
@@ -480,6 +444,8 @@ void BSP_RF_RS9116_JSON_Decode(void)
   */
 bool BSP_RF_RS9116_Init(void)
 {
+
+
 //	BSP_UART_DMA_Character_Match_IT_Mode();
   //rf.dma_mode=DMA_Character_Match_Mode;
 	/*ReSet Module*/	

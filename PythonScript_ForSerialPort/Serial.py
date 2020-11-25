@@ -70,6 +70,8 @@ def read_from_port(Host_COM):
     while True:
         Host_Send_byte  = Host_COM.read()
         Host_handle_data(Host_Send_byte)
+#Host_running = threading.Event()
+#Host_running.set()        
 Host_thread = threading.Thread(target=read_from_port, args=(Host_COM,))
 Host_thread.start()
 ########################################################
@@ -85,6 +87,8 @@ def read_from_port(Host_COM):
     while True:
         RSI_Send_byte  = RSI_COM.read()
         RSI_handle_data(RSI_Send_byte)
+#RSI_running = threading.Event()
+#RSI_running.set()
 RSI_thread = threading.Thread(target=read_from_port, args=(RSI_COM,))
 RSI_thread.start()
 ########################################################
@@ -94,6 +98,9 @@ try:
         time.sleep(5)
 # type in Crtl +C Will Close the project
 except KeyboardInterrupt:
+#    print('Event running.clear()')
+#    RSI_running.clear()
+#    Host_running.clear()
     Host_COM.close()    # Close Serial Port
     RSI_COM.close()    # Close Serial Port
 

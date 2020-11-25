@@ -65,16 +65,15 @@ int main(void)
 //  BSP_RF_RS9116_MQTT_Publish((char *)MQTT_Pub_Topic,mqtt_pub_data);
 //	BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"udid","NECCUIUaAZDC","s","1");
 //  BSP_RF_RS9116_MQTT_Publish((char *)MQTT_Pub_Topic,mqtt_pub_data);
-//	HAL_Delay(5000);
 
   while (1)
 	{
 
 
-			if(BSP_RF_MQTT_CMD_Pop()==CMD_MQTT_On)
+			if(BSP_RF_MQTT_CMD_Pop()!=CMD_EMPTY)
 			{
-					printf("Get MQTT On\r");
-			
+					//BSP_RF_RS9116_MQTT_UnSubscribe((char *)MQTT_Sub_Topic);
+					BSP_RF_RS9116_MQTT_DisConnect();
 			}
   }
 }

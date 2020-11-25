@@ -139,6 +139,8 @@ typedef struct
 	char        mqtt_recive_buf[MQTT_DATA_BUFFER_SIZE];
   MQTT_CMD_t  CMD_Buffer[MQTT_CMD_BUFFER_SIZE]; 
 	uint8_t     read_index;
+  uint8_t     write_index;
+
 }MQTT_t;
 /**@MQTT infor */
 //typedef enum

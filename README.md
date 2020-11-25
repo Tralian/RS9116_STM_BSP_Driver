@@ -38,7 +38,7 @@ In my library have using DMA UART peripheral .need config first\( also can just 
 
 Note 1: Can't using DMA channel 3 used for UART data reception
 
-![STM32F42xx and STM32F43xx Errata sheet](.gitbook/assets/image%20%286%29.png)
+![STM32F42xx and STM32F43xx Errata sheet](.gitbook/assets/image%20%286%29.png "STM32F42xx and STM32F43xx Errata sheet")
 
 #### \(2\).Import bsp\_rf/bsp\_uart library to STM project
 

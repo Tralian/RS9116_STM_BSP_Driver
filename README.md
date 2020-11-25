@@ -113,6 +113,12 @@ Using this python script, In Hardware setting is more simple  just connect STM a
 
 ![screen shot: python script ](.gitbook/assets/image%20%284%29.png)
 
+Sample Testing in YouTube :
+
+[https://www.youtube.com/watch?v=L9ByurI4\_Xg&feature=youtu.be](https://www.youtube.com/watch?v=L9ByurI4_Xg&feature=youtu.be)
+
+
+
 ##  Why Opensource 
 
 I'm working at a Start-up Company in Taiwan ,I'm very new at HW and FW design, but need lead  whole project\(actually only me  in the team at beginning\), you can image that how hopeless and helpless at that period.

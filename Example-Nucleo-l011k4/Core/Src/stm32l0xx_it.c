@@ -112,6 +112,7 @@ void USART2_IRQHandler(void)
 				BSP_UART_StopDMA();/*Stop DMA*/
 				BSP_UART_RX_DMA_Character_Martch_IT_Handler();
 			  __HAL_UART_CLEAR_FLAG(&huart, UART_CLEAR_CMF);
+      	__HAL_UART_CLEAR_FLAG(&huart,UART_CLEAR_OREF);//Clear Flag
 
 			}		
 	
@@ -123,7 +124,6 @@ void USART2_IRQHandler(void)
 //				/*Stop DMA*/
 //				BSP_UART_StopDMA();/*Stop DMA*/
 //				DMA_IDEL_IT_Get_data();	
-//       	__HAL_UART_CLEAR_FLAG(&huart,UART_CLEAR_OREF);//Clear Flag
 //	      __HAL_UART_CLEAR_FLAG(&huart, UART_CLEAR_IDLEF);
 
 //		}	 

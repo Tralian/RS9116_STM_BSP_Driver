@@ -152,25 +152,25 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>709</LineNumber>
+          <LineNumber>76</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134220032</Address>
+          <Address>134228072</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Drivers\BSP\Src\bsp_rf.c</Filename>
+          <Filename>../Core/Src/main.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\RS9116_ATCommand\../Drivers/BSP/Src/bsp_rf.c\709</Expression>
+          <Expression>\\RS9116_ATCommand\../Core/Src/main.c\76</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>714</LineNumber>
+          <LineNumber>230</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134220040</Address>
+          <Address>134220938</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -179,7 +179,39 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\Drivers\BSP\Src\bsp_rf.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\RS9116_ATCommand\../Drivers/BSP/Src/bsp_rf.c\714</Expression>
+          <Expression>\\RS9116_ATCommand\../Drivers/BSP/Src/bsp_rf.c\230</Expression>
+        </Bp>
+        <Bp>
+          <Number>2</Number>
+          <Type>0</Type>
+          <LineNumber>226</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134220920</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Drivers\BSP\Src\bsp_rf.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\RS9116_ATCommand\../Drivers/BSP/Src/bsp_rf.c\226</Expression>
+        </Bp>
+        <Bp>
+          <Number>3</Number>
+          <Type>0</Type>
+          <LineNumber>298</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134218520</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Drivers\BSP\Src\bsp_rf.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\RS9116_ATCommand\../Drivers/BSP/Src/bsp_rf.c\298</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -187,6 +219,16 @@
           <count>0</count>
           <WinNumber>1</WinNumber>
           <ItemText>rf</ItemText>
+        </Ww>
+        <Ww>
+          <count>1</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>huart</ItemText>
+        </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>hdma_usart2_rx</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -547,7 +589,7 @@
       <GroupNumber>5</GroupNumber>
       <FileNumber>23</FileNumber>
       <FileType>1</FileType>
-      <tvExp>0</tvExp>
+      <tvExp>1</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Drivers\BSP\Src\bsp_uart.c</PathWithFileName>

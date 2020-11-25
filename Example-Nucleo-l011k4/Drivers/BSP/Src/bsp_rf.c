@@ -293,9 +293,9 @@ void BSP_RF_AT_Command_Send(const char * command)
 void BSP_RF_AT_Command_Communication(const char * command,RS9116_State_t Next_State ,uint32_t timeout)
 {
 	BSP_UART_StopDMA();/*Stop DMA*/
-	if(BSP_RF_Get_DMA_character_match_word()==0x0A0000)
+	if(BSP_RF_Get_DMA_character_match_word()==0x0D)
 	{
-		BSP_RF_Set_DMA_character_match(0x0D);
+		BSP_RF_Set_DMA_character_match(0x0A);
 	}
 	BSP_RF_Clear_buffer((uint8_t *)rf.m_rx_buf,RX_BUFFER_SIZE);//clearerr rx buffer
 
@@ -706,7 +706,7 @@ bool BSP_RF_RS9116_MQTT_Publish(char * Topic,char * data)
 		}
 		if(rf.MQTT.mqtt_state==MQTT_Published)
 		{	
-			return true;
+ 			return true;
 
 		}
 	
@@ -877,7 +877,7 @@ void BSP_RF_Set_DMA_character_match(uint8_t ch)
   *@author YZTEK Wilson
 					 
   */
-uint32_t BSP_RF_Get_DMA_character_match_word(void)
+uint8_t BSP_RF_Get_DMA_character_match_word(void)
 {
 	return rf.DMA_IT_Character;
 }

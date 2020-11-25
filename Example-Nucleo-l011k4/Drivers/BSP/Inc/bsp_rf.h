@@ -188,7 +188,7 @@ void BSP_RF_set_status(RS9116_State_t stage);
 RS9116_State_t BSP_RF_get_module_status(void);
 //DMA_MODE_T BSP_RF_Get_DMA_mode(void);
 
-uint32_t BSP_RF_Get_DMA_character_match_word(void);
+uint8_t BSP_RF_Get_DMA_character_match_word(void);
 void BSP_RF_Set_DMA_character_match(uint8_t ch);
 
 /* Linker functions ------------------------------------------------------- */

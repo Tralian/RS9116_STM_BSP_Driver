@@ -2,49 +2,47 @@
 
 ## Why I choose Redpine RSI9116
 
-Recently. I'm studying in  low power consumption module for WI-FI application, I using Texas Instruments CC3220 MCU develop my project at the beginning. Although CC3220 have great performed at power consumption and easy using platform\(have a lot  Free RTOS resource \).but this MCU can't change Main clock source\(just fix at 80MHz\), It will be okay with some project, but it will be deadly problem with project using battery .At the same time I found Redpine RSI9116\(maybe recent Silicon labs acquisition it\),Have better  WI-FI power consumption than CC3220, And can connect it just thought AT command. It's the gospel for me
+Recently. I'm studying in  low power consumption module for WI-FI application, I using Texas Instruments CC3220 MCU develop my project at the beginning. CC3220 have great performed at power consumption and easy using platform\(have a lot  Free RTOS resource \), have another m0 MCU inside the SoC which can building application code. But it can't change main clock source\(just fix at 80MHz\), It will be okay with some project, but it will be deadly problem with project using battery .At the same time I found Redpine RSI9116\(maybe recent Silicon labs acquisition it\),Have better  WI-FI power consumption than CC3220, And can connect it just thought AT command. It totally fitty my demand ,almost the gospel for me
 
 ## Why write library by myself
 
 Redpine have abundant example coed with WIFI host, but most of that are is for sapis communicate, and Redpine library is coding base on  Free RTOS ,In my application, using bare metal environment is enough\(less code size and better power consumption \).so I decide write a library by myself 
 
-## Why Opensource 
 
-I'm working at a Start-up Company in Taiwan ,I'm very new at HW and FW design, but need lead  whole project\(actually only me in the team at beginning\), you can image that how hopeless and helpless at that period
 
- Luckly, I met my mentor  Zhih-Tai, Liu last year \(He is a freelancer and also have a  [Electro-Hedgehog](https://www.tasker.com.tw/workroom/3KWQr) in Taiwan Tasker \), He teach me a lot at HW designed and FW structure. We often discussing some designed over and over again excitedly  
+## Implement Flow Chart
 
- so I decide pass this passion to other one who struggle with problem but no have abundant  resource 
+  This is the flow chart implement RS9116 AT Command BSP Using  STM32 Nucleo board
 
-In the end , thank my partner chase hu, you are so support no only in HW and ME but also in  design ideas
-
-## Develop Flow Chart
-
-![ Implement Flow chart](.gitbook/assets/image.png)
-
-#### This is the flow chart implement  RS9116 Using RS9116 EVM and STM32 Nucleo board
+![](.gitbook/assets/image.png)
 
 ##  1.RS9116 EVM Firmware update
 
-When star you project Need  update  EVM FW at first\( Different FW version will effect AT Command parameter\)  , it can reference silicon lab opensource document.
+ Need  update RS9116 module FW to Version 2.0  \( Different FW version will effect AT Command  parameter\)  ,  Can just reference silicon lab opensource document below
 
  [AN1290: RS9116W Firmware Update Application Note](https://www.silabs.com/documents/login/application-notes/an1290-rs9116w-firmware-update-application-note.pdf)
 
 ## 2.Load AWS Certificate using python script
 
+For security ,Burn certificate in module before using  it is  better way than sent by host MCU
+
 Silicon provide simple Python 2.7 script to upload AWS certificate to RS9116 module. but little complex.
 
-so my work mate rewrite it ,you also can find python script in my project
+so my project also provide python script at one click 
 
 ## _3.STM board setting and Import library_
 
-### 1.Create STM project 
+#### \(1\).Create STM project 
 
-In my library have using DMA UART peripheral .need config first\( also can just modify form my example , just slight change in GPIO port and DMA channel I though\)
+In my library have using DMA UART peripheral .need config first\( also can just modify form my example , just slight change in GPIO port and DMA channel \)
 
-### 2.Import bsp\_rf/bsp\_uart library to STM project
+Note 1: Can't using DMA channel 3 used for UART data reception
 
-### 3.Config MQTT setting in bsp\_rf.c
+![STM32F42xx and STM32F43xx Errata sheet](.gitbook/assets/image%20%286%29.png)
+
+#### \(2\).Import bsp\_rf/bsp\_uart library to STM project
+
+#### \(3\).Config MQTT setting in bsp\_rf.c
 
 ```c
 const char * SSID="Yours WIFI";
@@ -60,16 +58,7 @@ const char * MQTT_En_clean_session="1";
 const char * MQTT_En_keep_alive_interval="1";
 ```
 
-### 4.Config MQTT Topic in main c
-
-```c
-const char * MQTT_Sub_Topic="topic/Subcribe";
-const char * MQTT_Pub_Topic="topic/Publish";
-```
-
-
-
-### 5.Config MQTT Topic in main c
+#### \(4\).Running Testing code  in main c
 
 ```c
 	BSP_RF_RS9116_Init();
@@ -82,7 +71,7 @@ const char * MQTT_Pub_Topic="topic/Publish";
 
 ## 4.Test
 
-Unfortunately, In RS9116 EVM Board don't have TX/RX pinout\(can't bypass form USB virtual comport driver like cp2302 \), I try connect GPIO\_8 \(RSI9116 TX\),GPIO\_9 \(RSI9116 RX\) by jumper . and USB port just plug in Power port . But still have some bug and unstable\(If have better solution please tell me\)
+Unfortunately, In RS9116 EVM Board don't have TX/RX pinout directly\(can't bypass form USB virtual comport driver at EVM \), I try connect GPIO\_8 \(RSI9116 TX\),GPIO\_9 \(RSI9116 RX\) by jumper . and USB port just plug in\(J23\) Power port \(Not \(J21\)UART port \). But still have some bug and unstable\(If have better solution please tell me\)
 
 ![RS9116 EVM Sch ](.gitbook/assets/image%20%282%29.png)
 
@@ -90,10 +79,17 @@ In the end I wrote a python script, just simple exchange data between two virtua
 
 ![Serial data exchange Block diagram ](.gitbook/assets/image%20%283%29.png)
 
-So using this python script, In Hardware setting   just connect STM and RSI 9116 EVM  in USB port .After Execute python script , chose you comport ,then you can start your project
+Using this python script, In Hardware setting is more simple  just connect STM and RSI 9116 EVM\(J21\)  in USB port .After Execute python script , choose right virtual comport , it will start working
 
-![python script screen shot](.gitbook/assets/image%20%284%29.png)
+![screen shot: python script ](.gitbook/assets/image%20%284%29.png)
 
-  
+##  Why Opensource 
 
+I'm working at a Start-up Company in Taiwan ,I'm very new at HW and FW design, but need lead  whole project\(actually only me  in the team at beginning\), you can image that how hopeless and helpless at that period.
+
+ Luckily, I met my mentor  Zhih-Tai, Liu last year \(He is a freelancer and also have a  [Electro-Hedgehog](https://www.tasker.com.tw/workroom/3KWQr) in Taiwan Tasker \), He teach me a lot at HW designed and FW coding concept. We often discussing some designed excitedly  
+
+ so I decide pass this passion to who struggling in  same situation but no have abundant  resource 
+
+In the end , thank my partner chase hu, you are so support no only in HW and ME but also in  design ideas
 

@@ -103,7 +103,7 @@ int main(void)
 
 Unfortunately, In RS9116 EVM Board don't have TX/RX pinout directly\(can't bypass form USB virtual comport driver at EVM \), I try connect GPIO\_8 \(RSI9116 TX\),GPIO\_9 \(RSI9116 RX\) by jumper . and USB port just plug in\(J23\) Power port \(Not \(J21\)UART port \). But still have some bug and unstable\(If have better solution please tell me\)
 
-!["image-captions":{"caption":RS9116 EVM Sch }](.gitbook/assets/image%20%282%29.png)
+![RS9116 EVM Sch](.gitbook/assets/image%20%282%29.png)
 
 In the end I wrote a python script, just simple exchange data between two virtual comport ,and monitor by CMD\( you also can find this script form my git project\),Block diagram is below
 

@@ -60,11 +60,11 @@ int main(void)
 	BSP_RF_RS9116_MQTT_Subscribe((char *)MQTT_Sub_Topic);
 	
 	/*MQTT Publish */
-//  static char mqtt_pub_data[100];
-//	BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"udid","NECCUIUaAZDC","s","2");
-//  BSP_RF_RS9116_MQTT_Publish((char *)MQTT_Pub_Topic,mqtt_pub_data);
-//	BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"udid","NECCUIUaAZDC","s","1");
-//  BSP_RF_RS9116_MQTT_Publish((char *)MQTT_Pub_Topic,mqtt_pub_data);
+  static char mqtt_pub_data[100];
+	BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"udid","NECCUIUaAZDC","s","2");
+  BSP_RF_RS9116_MQTT_Publish((char *)MQTT_Pub_Topic,mqtt_pub_data);
+	BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"udid","NECCUIUaAZDC","s","1");
+  BSP_RF_RS9116_MQTT_Publish((char *)MQTT_Pub_Topic,mqtt_pub_data);
 
   while (1)
 	{

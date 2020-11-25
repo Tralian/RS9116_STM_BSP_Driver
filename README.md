@@ -56,7 +56,6 @@ const char * MQTT_client_port="5503";
 const char * MQTT_keep_alive_interval="80";
 const char * MQTT_En_clean_session="1";
 const char * MQTT_En_keep_alive_interval="1";
-
 const char * MQTT_Sub_Topic="topic/Sub";
 const char * MQTT_Pub_Topic="topic/Pub";
 const char * MQTT_Sub_Objet="{\"msg\":";
@@ -71,30 +70,24 @@ int main(void)
   HAL_Init();  
   SystemClock_Config(); 
   MX_GPIO_Init();  
-	BSP_UART_Init();
-	
-	BSP_RF_RS9116_Init();
-	
+  BSP_UART_Init();
+  BSP_RF_RS9116_Init();
   BSP_RF_RS9116_WIFI_Connect();
-	BSP_RF_RS9116_MQTT_Connect();
-	/*MQTT Subscribe */
-	BSP_RF_RS9116_MQTT_Subscribe((char *)MQTT_Sub_Topic);
-	
-	/*MQTT Publish */
+  BSP_RF_RS9116_MQTT_Connect();
+  /*MQTT Subscribe */
+  BSP_RF_RS9116_MQTT_Subscribe((char *)MQTT_Sub_Topic);
+   /*MQTT Publish */
   static char mqtt_pub_data[100];
-	BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"Object1","Data1","Object2","On");
+  BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"Object1","Data1","Object2","On");
   BSP_RF_RS9116_MQTT_Publish((char *)MQTT_Pub_Topic,mqtt_pub_data);
-	BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"Object2","Data1","state","Off");
+  BSP_RF_RS9116_JSON_Encode(mqtt_pub_data,"Object2","Data1","state","Off");
   BSP_RF_RS9116_MQTT_Publish((char *)MQTT_Pub_Topic,mqtt_pub_data);
-
   while (1)
+  {
+	if(BSP_RF_MQTT_CMD_Pop()!=CMD_EMPTY)
 	{
-
-
-			if(BSP_RF_MQTT_CMD_Pop()!=CMD_EMPTY)
-			{
-					BSP_RF_RS9116_MQTT_DisConnect();
-			}
+		BSP_RF_RS9116_MQTT_DisConnect();
+	}
   }
 }
 ```
@@ -103,15 +96,15 @@ int main(void)
 
 Unfortunately, In RS9116 EVM Board don't have TX/RX pinout directly\(can't bypass form USB virtual comport driver at EVM \), I try connect GPIO\_8 \(RSI9116 TX\),GPIO\_9 \(RSI9116 RX\) by jumper . and USB port just plug in\(J23\) Power port \(Not \(J21\)UART port \). But still have some bug and unstable\(If have better solution please tell me\)
 
-![RS9116 EVM Sch](.gitbook/assets/image%20%282%29.png)
+![RS9116 EVM Sch](.gitbook/assets/image%20%282%29.png "RS9116 EVM Sch")
 
 In the end I wrote a python script, just simple exchange data between two virtual comport ,and monitor by CMD\( you also can find this script form my git project\),Block diagram is below
 
-![Serial data exchange Block diagram ](.gitbook/assets/image%20%283%29.png)
+![Serial data exchange Block diagram ](.gitbook/assets/image%20%283%29.png "Serial data exchange Block diagram")
 
 Using this python script, In Hardware setting is more simple  just connect STM and RSI 9116 EVM\(J21\)  in USB port .After Execute python script , choose right virtual comport , it will start working
 
-![screen shot: python script ](.gitbook/assets/image%20%284%29.png)
+![screen shot: python script ](.gitbook/assets/image%20%284%29.png "screen shot: python script")
 
 Sample Testing in YouTube :
 
